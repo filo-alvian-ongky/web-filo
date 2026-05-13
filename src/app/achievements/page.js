@@ -21,7 +21,7 @@ export default function Achievements() {
       title: "Teaching Fundamentals",
       provider: "Code.org",
       date: "04 Februari 2026",
-      image: "/Code.org_Teaching.jpg",
+      image: "/code.org_Teaching.jpg",
     },
     {
       title: "Silver Medal",
