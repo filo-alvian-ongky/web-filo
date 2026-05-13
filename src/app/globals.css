@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Samsung Style: Smooth Scrolling & Selection */
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background-color: #0074e4; /* Samsung Blue */
+  color: white;
+}
+
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
