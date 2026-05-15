@@ -83,11 +83,15 @@ export default function Achievements() {
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedCert(null)} className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[150] cursor-zoom-out" />
             <motion.div initial={{ opacity: 0, scale: 0.9, y: 40 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 40 }} className="fixed inset-0 flex items-center justify-center z-[151] pointer-events-none p-6">
-              <div className="relative w-full max-w-4xl bg-white dark:bg-neutral-900 rounded-t-[2.5rem] rounded-b-none overflow-hidden shadow-2xl pointer-events-auto border border-gray-200 dark:border-white/10">
+              
+              {/* MODIFIKASI KELENGKUNGAN RESPONSIVE DI SINI */}
+              <div className="relative w-full max-w-4xl bg-white dark:bg-neutral-900 rounded-t-[1.5rem] md:rounded-t-[2.5rem] rounded-b-none overflow-hidden shadow-2xl pointer-events-auto border border-gray-200 dark:border-white/10">
+                
                 <div className="p-6 md:px-10 flex justify-between items-center border-b dark:border-white/5 bg-white dark:bg-neutral-900">
                   <div><h2 className="text-xl font-bold italic">{selectedCert.title}</h2><p className="text-sm text-blue-600 font-medium">{selectedCert.provider}</p></div>
                   <button onClick={() => setSelectedCert(null)} className="p-3 bg-gray-100 dark:bg-white/5 rounded-2xl hover:bg-red-500 hover:text-white transition-all active:scale-90"><X size={24} /></button>
                 </div>
+                
                 <div className="bg-gray-50 dark:bg-black w-full overflow-hidden">
                   {selectedCert.image.endsWith('.pdf') ? (
                     <div className="w-full aspect-video"><iframe src={`${selectedCert.image}#toolbar=0`} className="w-full h-full" title={selectedCert.title} /></div>
@@ -102,6 +106,7 @@ export default function Achievements() {
                     </div>
                   )}
                 </div>
+
               </div>
             </motion.div>
           </>
