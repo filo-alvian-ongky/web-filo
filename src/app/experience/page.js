@@ -1,18 +1,27 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Card from "../../components/Card";
+import HelpButton from "../../components/element/help"; 
+import IntroModal from "../../components/element/IntroModal";
 
 export default function Experience() {
-  // Variabel untuk animasi urutan (Stagger)
+  const [isIntroOpen, setIsIntroOpen] = useState(false);
+
+  useEffect(() => {
+    const hasSeenIntro = localStorage.getItem("hasSeenIntro");
+    if (!hasSeenIntro) { setIsIntroOpen(true); }
+  }, []);
+
+  const closeIntro = () => {
+    setIsIntroOpen(false);
+    localStorage.setItem("hasSeenIntro", "true");
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15, // Jeda antar elemen 0.15 detik
-      },
-    },
+    visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
   };
 
   const itemVariants = {
@@ -21,17 +30,9 @@ export default function Experience() {
   };
 
   return (
-    <main className="min-h-screen bg-white dark:bg-[#0a0a0a] pt-32 pb-20 px-6 transition-colors duration-300">
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="max-w-4xl mx-auto"
-      >
-        {/* Judul sekarang ikut dalam urutan animasi */}
-        <motion.h1 variants={itemVariants} className="text-5xl font-extrabold mb-12 tracking-tighter">
-          Pengalaman Profesional.
-        </motion.h1>
+    <main className="min-h-screen bg-white dark:bg-[#0a0a0a] pt-32 pb-20 px-6 transition-colors duration-300 relative">
+      <motion.div variants={containerVariants} initial="hidden" animate="visible" className="max-w-4xl mx-auto">
+        <motion.h1 variants={itemVariants} className="text-5xl font-extrabold mb-12 tracking-tighter">Pengalaman Profesional.</motion.h1>
         
         <div className="space-y-8">
           <motion.div variants={itemVariants}>
@@ -59,6 +60,10 @@ export default function Experience() {
           </motion.div>
         </div>
       </motion.div>
+
+      {/* MODAL KOMPONEN */}
+      <HelpButton onClick={() => setIsIntroOpen(true)} />
+      <IntroModal isOpen={isIntroOpen} onClose={closeIntro} />
     </main>
   );
 }
