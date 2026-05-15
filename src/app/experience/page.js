@@ -19,21 +19,13 @@ export default function Experience() {
     localStorage.setItem("hasSeenIntro", "true");
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
-  };
+  const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.15 } } };
+  const itemVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } } };
 
   return (
     <main className="min-h-screen bg-white dark:bg-[#0a0a0a] pt-32 pb-20 px-6 transition-colors duration-300 relative">
       <motion.div variants={containerVariants} initial="hidden" animate="visible" className="max-w-4xl mx-auto">
         <motion.h1 variants={itemVariants} className="text-5xl font-extrabold mb-12 tracking-tighter">Pengalaman Profesional.</motion.h1>
-        
         <div className="space-y-8">
           <motion.div variants={itemVariants}>
             <Card>
@@ -46,7 +38,6 @@ export default function Experience() {
               </ul>
             </Card>
           </motion.div>
-
           <motion.div variants={itemVariants}>
             <Card>
               <p className="text-blue-600 font-bold text-sm mb-1 uppercase">2025 — 2026</p>
@@ -60,8 +51,6 @@ export default function Experience() {
           </motion.div>
         </div>
       </motion.div>
-
-      {/* MODAL KOMPONEN */}
       <HelpButton onClick={() => setIsIntroOpen(true)} />
       <IntroModal isOpen={isIntroOpen} onClose={closeIntro} />
     </main>

@@ -22,17 +22,13 @@ export default function Projects() {
     if (!hasSeenIntro) { setIsIntroOpen(true); }
   }, []);
 
-  const closeIntro = () => {
-    setIsIntroOpen(false);
-    localStorage.setItem("hasSeenIntro", "true");
-  };
+  const closeIntro = () => { setIsIntroOpen(false); localStorage.setItem("hasSeenIntro", "true"); };
 
   return (
     <main className="min-h-screen bg-white dark:bg-[#0a0a0a] pt-32 pb-20 px-6 transition-colors duration-300 relative">
       <div className="max-w-6xl mx-auto">
         <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-5xl font-extrabold mb-12 tracking-tighter">Karya & Proyek.</motion.h1>
 
-        {/* GRID PROYEK */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           {projects.map((project) => (
             <motion.div key={project.id} layoutId={project.id} onClick={() => setSelectedId(project.id)} whileTap={{ scale: 0.95 }} className="cursor-pointer group">
@@ -57,11 +53,9 @@ export default function Projects() {
           ))}
         </div>
 
-        {/* MODAL KOMPONEN */}
         <HelpButton onClick={() => setIsIntroOpen(true)} />
         <IntroModal isOpen={isIntroOpen} onClose={closeIntro} />
 
-        {/* MODAL PLAYER */}
         <AnimatePresence>
           {selectedId && (
             <>

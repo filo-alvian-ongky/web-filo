@@ -46,31 +46,19 @@ export default function Navbar() {
     <nav className="fixed w-full z-50 top-0 bg-white/70 dark:bg-[#0a0a0a]/70 backdrop-blur-xl border-b border-gray-100 dark:border-white/5 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
         
-        {/* Efek klik pada Logo */}
+        {/* Logo kembali normal */}
         <Link href="/" className="font-bold text-2xl tracking-tighter text-black dark:text-white relative z-[60] active:scale-95 transition-transform duration-200 inline-block">
           <span className="text-blue-600">FiloAlvian</span>.com
         </Link>
 
-        {/* Desktop */}
         <div className="hidden md:flex items-center space-x-8">
           <div className="flex space-x-8">
             {navItems.map((item) => (
-              <Link 
-                key={item.name} 
-                href={item.path} 
-                // Efek klik pada menu Desktop
-                className={`text-sm font-medium transition-all active:scale-95 inline-block ${
-                  pathname === item.path 
-                  ? "text-blue-600" 
-                  : "text-gray-500 hover:text-black dark:hover:text-white"
-                }`}
-              >
+              <Link key={item.name} href={item.path} className={`text-sm font-medium transition-all active:scale-95 inline-block ${pathname === item.path ? "text-blue-600" : "text-gray-500 hover:text-black dark:hover:text-white"}`}>
                 {item.name}
               </Link>
             ))}
           </div>
-
-          {/* Efek klik pada tombol Tema */}
           <button onClick={toggleTheme} className="p-2.5 bg-gray-100 dark:bg-white/5 rounded-2xl text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-all active:scale-90">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div key={theme} initial={{ rotate: 45, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -45, opacity: 0 }} transition={{ duration: 0.2 }}>
@@ -80,7 +68,6 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile Action */}
         <div className="flex md:hidden items-center space-x-3 relative z-[60]">
           <button onClick={toggleTheme} className="p-2.5 bg-gray-100 dark:bg-white/5 rounded-2xl text-gray-700 dark:text-gray-300 transition-transform active:scale-90">
             {theme === "light" ? <Moon size={20} strokeWidth={2.5} /> : <Sun size={20} strokeWidth={2.5} />}
@@ -91,18 +78,11 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="absolute top-0 left-0 w-full h-screen bg-white dark:bg-[#0a0a0a] z-[50] flex flex-col items-center justify-center space-y-8 px-6">
             {navItems.map((item) => (
-              <Link 
-                key={item.name} 
-                href={item.path} 
-                onClick={() => setIsOpen(false)} 
-                // Efek klik pada menu Mobile
-                className={`text-3xl font-bold tracking-tighter transition-all active:scale-90 inline-block ${pathname === item.path ? "text-blue-600" : "text-gray-400"}`}
-              >
+              <Link key={item.name} href={item.path} onClick={() => setIsOpen(false)} className={`text-3xl font-bold tracking-tighter transition-all active:scale-90 inline-block ${pathname === item.path ? "text-blue-600" : "text-gray-400"}`}>
                 {item.name}
               </Link>
             ))}

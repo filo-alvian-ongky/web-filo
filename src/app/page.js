@@ -16,9 +16,7 @@ export default function Home() {
 
   useEffect(() => {
     const hasSeenIntro = localStorage.getItem("hasSeenIntro");
-    if (!hasSeenIntro) {
-      setIsIntroOpen(true);
-    }
+    if (!hasSeenIntro) { setIsIntroOpen(true); }
   }, []);
 
   const closeIntro = () => {
@@ -26,15 +24,8 @@ export default function Home() {
     localStorage.setItem("hasSeenIntro", "true");
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
-  };
-
-  const textVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
-  };
+  const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.15 } } };
+  const textVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } };
 
   const socialLinks = [
     { name: "Gmail", iconPath: "/gmail.jpg", href: "mailto:filoalvianongky@gmail.com" },
@@ -46,12 +37,11 @@ export default function Home() {
     <main className="min-h-screen bg-white dark:bg-[#0a0a0a] text-black dark:text-white transition-colors duration-300 pb-20 overflow-hidden relative">
       <div className="max-w-7xl mx-auto px-6">
         
-        {/* --- HERO SECTION --- */}
         <motion.section initial="hidden" animate="visible" variants={containerVariants} className="pt-32 pb-16 flex flex-col md:flex-row items-center gap-12 text-center md:text-left">
           <div className="flex-1 space-y-6 w-full">
             <motion.div variants={textVariants} className="flex items-center justify-center md:justify-start min-h-[100px] md:min-h-[140px] overflow-hidden">
               <h1 className="font-extrabold tracking-tighter leading-tight whitespace-nowrap text-[clamp(1.5rem,6vw,4rem)] w-full">
-                <Typewriter options={{ autoStart: true, loop: true, delay: 60, deleteSpeed: 40 }} onInit={(typewriter) => { typewriter.typeString('Halo, pengunjung!').pauseFor(1500).deleteAll().typeString('Salam kenal ya!').pauseFor(1500).deleteAll().start(); }} />
+                <Typewriter options={{ autoStart: true, loop: true, delay: 60, deleteSpeed: 40 }} onInit={(tw) => { tw.typeString('Halo, pengunjung!').pauseFor(1500).deleteAll().typeString('Salam kenal ya!').pauseFor(1500).deleteAll().start(); }} />
               </h1>
             </motion.div>
             <motion.p variants={textVariants} className="text-lg md:text-xl text-gray-700 dark:text-gray-300 font-light max-w-lg mx-auto md:mx-0 leading-relaxed text-center md:text-left">
@@ -63,13 +53,10 @@ export default function Home() {
             </motion.div>
           </div>
           <motion.div variants={textVariants} className="w-48 h-48 md:w-72 md:h-72 shrink-0 relative order-first md:order-last cursor-pointer group" onClick={() => setIsPreviewOpen(true)} whileHover={{ scale: 1.05, y: -5 }} whileTap={{ scale: 0.95 }} transition={{ type: "spring", stiffness: 400, damping: 25 }}>
-            <div className="bg-gray-50 dark:bg-neutral-900 rounded-[3.5rem] w-full h-full relative z-10 shadow-2xl border border-gray-100 dark:border-white/10 flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:shadow-blue-500/20 group-hover:border-blue-600/30">
-              <Image src="/profile.jpeg" alt="Foto Profil" fill className="object-cover" priority />
-            </div>
+            <div className="bg-gray-50 dark:bg-neutral-900 rounded-[3.5rem] w-full h-full relative z-10 shadow-2xl border border-gray-100 dark:border-white/10 flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:shadow-blue-500/20 group-hover:border-blue-600/30"><Image src="/profile.jpeg" alt="Foto Profil" fill className="object-cover" priority /></div>
           </motion.div>
         </motion.section>
 
-        {/* --- BENTO GRID --- */}
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-1">
             <Card className="h-full flex flex-col justify-center gap-6 border-none text-left transition-all hover:shadow-lg">
@@ -93,11 +80,9 @@ export default function Home() {
         </motion.div>
       </div>
 
-      {/* MODAL KOMPONEN */}
       <HelpButton onClick={() => setIsIntroOpen(true)} />
       <IntroModal isOpen={isIntroOpen} onClose={closeIntro} />
 
-      {/* --- MODAL HUBUNGI SAYA --- */}
       <AnimatePresence>
         {isContactOpen && (
           <>
@@ -120,7 +105,6 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* --- MODAL PREVIEW FOTO PROFIL --- */}
       <AnimatePresence>
         {isPreviewOpen && (
           <>
