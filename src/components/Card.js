@@ -21,6 +21,7 @@ export default function Card({ children, className = "" }) {
         y: -5,
         transition: { type: "spring", stiffness: 400, damping: 25 }
       }}
+      whileTap={{ scale: 0.98 }} // <-- TAMBAHAN EFEK KLIK
       className={`bg-gray-50 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 p-10 rounded-[32px] hover:border-blue-600/30 dark:hover:border-blue-600/30 transition-colors duration-300 shadow-sm ${className}`}
     >
       {children}

@@ -15,7 +15,7 @@ export default function Achievements() {
       title: "Python Dev",
       provider: "SoloLearn",
       date: "04 Februari 2026",
-      image: "/SoloLearn_PythonDev.jpg", // Ganti dengan nama file di folder public
+      image: "/SoloLearn_PythonDev.jpg", 
     },
     {
       title: "Teaching Fundamentals",
@@ -115,7 +115,8 @@ export default function Achievements() {
                   </div>
                   <button
                     onClick={() => setSelectedCert(ach)}
-                    className="flex items-center gap-2 text-sm font-bold text-blue-600 group-hover:gap-3 transition-all"
+                    // TAMBAHAN: Efek klik membal pada tombol view detail
+                    className="flex items-center gap-2 text-sm font-bold text-blue-600 group-hover:gap-3 transition-all active:scale-90"
                   >
                     View Detail <ArrowRight size={16} />
                   </button>
@@ -143,10 +144,8 @@ export default function Achievements() {
               exit={{ opacity: 0, scale: 0.9, y: 40 }}
               className="fixed inset-0 flex items-center justify-center z-[151] pointer-events-none p-6"
             >
-              {/* MODAL CONTAINER: Melengkung Atas, Siku Bawah */}
               <div className="relative w-full max-w-4xl bg-white dark:bg-neutral-900 rounded-t-[2.5rem] rounded-b-none overflow-hidden shadow-2xl pointer-events-auto border border-gray-200 dark:border-white/10">
                 
-                {/* Modal Header */}
                 <div className="p-6 md:px-10 flex justify-between items-center border-b dark:border-white/5 bg-white dark:bg-neutral-900">
                   <div>
                     <h2 className="text-xl font-bold italic">{selectedCert.title}</h2>
@@ -154,16 +153,16 @@ export default function Achievements() {
                   </div>
                   <button 
                     onClick={() => setSelectedCert(null)}
-                    className="p-3 bg-gray-100 dark:bg-white/5 rounded-2xl hover:bg-red-500 hover:text-white transition-all"
+                    // TAMBAHAN: Efek klik membal pada tombol close X
+                    className="p-3 bg-gray-100 dark:bg-white/5 rounded-2xl hover:bg-red-500 hover:text-white transition-all active:scale-90"
                   >
                     <X size={24} />
                   </button>
                 </div>
 
-                {/* IMAGE CONTENT: Mengikuti Tinggi Gambar (Tanpa Fixed Aspect Ratio) */}
                 <div className="bg-gray-50 dark:bg-black w-full overflow-hidden">
                   {selectedCert.image.endsWith('.pdf') ? (
-                    <div className="w-full aspect-video"> {/* PDF tetap butuh ratio agar bisa dibaca */}
+                    <div className="w-full aspect-video">
                       <iframe
                         src={`${selectedCert.image}#toolbar=0`}
                         className="w-full h-full"
@@ -175,19 +174,19 @@ export default function Achievements() {
                       <Image
                         src={selectedCert.image}
                         alt={selectedCert.title}
-                        width={1200} // Nilai max lebar
-                        height={800} // Nilai height proporsional (akan dioverride style auto)
-                        className="w-full h-auto object-contain" // h-auto agar container mengikuti tinggi gambar
+                        width={1200} 
+                        height={800} 
+                        className="w-full h-auto object-contain"
                         unoptimized
                       />
                       
-                      {/* Tombol Verifikasi PDF jika ada */}
                       {selectedCert.pdfLink && (
                         <div className="p-6 flex justify-center bg-gray-50 dark:bg-black/40">
                           <a 
                             href={selectedCert.pdfLink} 
                             target="_blank" 
                             rel="noopener noreferrer"
+                            // TAMBAHAN: Efek klik pada button pdf link
                             className="bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-blue-700 shadow-xl transition-all active:scale-95"
                           >
                             <ExternalLink size={16} /> Lihat List Juara Lengkap (PDF)

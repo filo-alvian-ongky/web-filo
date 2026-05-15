@@ -1,15 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Card from "../components/Card";
 import Typewriter from "typewriter-effect";
 import Image from "next/image";
-import { X, ArrowRight } from "lucide-react"; 
+import { X, ArrowRight, Sparkles, Layout, Menu, Moon, HelpCircle } from "lucide-react"; 
 
 export default function Home() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
+  const [isIntroOpen, setIsIntroOpen] = useState(false);
+
+  useEffect(() => {
+    const hasSeenIntro = localStorage.getItem("hasSeenIntro");
+    if (!hasSeenIntro) {
+      setIsIntroOpen(true);
+    }
+  }, []);
+
+  const closeIntro = () => {
+    setIsIntroOpen(false);
+    localStorage.setItem("hasSeenIntro", "true");
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -27,7 +40,7 @@ export default function Home() {
   const socialLinks = [
     {
       name: "Gmail",
-      iconPath: "/gmail.jpg", // Pastikan file aslinya memang .jpg
+      iconPath: "/gmail.jpg", 
       href: "mailto:filoalvianongky@gmail.com",
     },
     {
@@ -43,7 +56,7 @@ export default function Home() {
   ];
 
   return (
-    <main className="min-h-screen bg-white dark:bg-[#0a0a0a] text-black dark:text-white transition-colors duration-300 pb-20 overflow-hidden">
+    <main className="min-h-screen bg-white dark:bg-[#0a0a0a] text-black dark:text-white transition-colors duration-300 pb-20 overflow-hidden relative">
       
       <div className="max-w-7xl mx-auto px-6">
         
@@ -93,7 +106,9 @@ export default function Home() {
               >
                 Hubungi Saya
               </button>
-              <a href="/cv.pdf" className="border border-gray-200 dark:border-white/10 px-8 py-3.5 rounded-2xl font-semibold hover:bg-gray-50 dark:hover:bg-white/10 transition-all text-center">Unduh CV</a>
+              <a href="/cv.pdf" className="border border-gray-200 dark:border-white/10 px-8 py-3.5 rounded-2xl font-semibold hover:bg-gray-50 dark:hover:bg-white/10 transition-all text-center active:scale-95 inline-block">
+                Unduh CV
+              </a>
             </motion.div>
           </div>
 
@@ -102,6 +117,7 @@ export default function Home() {
             className="w-48 h-48 md:w-72 md:h-72 shrink-0 relative order-first md:order-last cursor-pointer group"
             onClick={() => setIsPreviewOpen(true)}
             whileHover={{ scale: 1.05, y: -5 }}
+            whileTap={{ scale: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
           >
             <div className="bg-gray-50 dark:bg-neutral-900 rounded-[3.5rem] w-full h-full relative z-10 shadow-2xl border border-gray-100 dark:border-white/10 flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:shadow-blue-500/20 group-hover:border-blue-600/30">
@@ -119,14 +135,14 @@ export default function Home() {
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
           <div className="md:col-span-1">
-            <Card className="h-full flex flex-col justify-center gap-6 border-none text-left">
+            <Card className="h-full flex flex-col justify-center gap-6 border-none text-left transition-all hover:shadow-lg">
               <h2 className="text-2xl font-bold tracking-tight text-blue-600">🏆 Achievements</h2>
               <div className="space-y-4">
-                <div className="border-l-4 border-blue-600 pl-4">
+                <div className="border-l-4 border-blue-600 pl-4 transition-transform hover:translate-x-1 cursor-default">
                   <h3 className="font-bold">🥈 Silver Medalist</h3>
                   <p className="text-sm text-gray-500">AISEEF - 2026</p>
                 </div>
-                <div className="border-l-4 border-blue-600 pl-4">
+                <div className="border-l-4 border-blue-600 pl-4 transition-transform hover:translate-x-1 cursor-default">
                   <h3 className="font-bold">🎖️ National Finalist</h3>
                   <p className="text-sm text-gray-500">Fasilkomfest - 2026</p>
                 </div>
@@ -138,15 +154,15 @@ export default function Home() {
             <Card className="h-full border-none text-left">
               <h2 className="text-2xl font-bold tracking-tight mb-6 text-blue-600">🌟 Eksplorasi</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
-                <div className="bg-white dark:bg-black p-6 rounded-3xl border border-gray-100 dark:border-neutral-800">
+                <div className="bg-white dark:bg-black p-6 rounded-3xl border border-gray-100 dark:border-neutral-800 transition-all hover:-translate-y-1 hover:shadow-md active:scale-[0.98] cursor-default">
                   <p className="font-bold text-blue-600 mb-2">🎮 Game Dev & Modding</p>
                   <p className="text-gray-600 dark:text-gray-400">Scripting Lua di Roblox Studio dan desain map 3D Unity untuk Zepeto.</p>
                 </div>
-                <div className="bg-white dark:bg-black p-6 rounded-3xl border border-gray-100 dark:border-neutral-800">
+                <div className="bg-white dark:bg-black p-6 rounded-3xl border border-gray-100 dark:border-neutral-800 transition-all hover:-translate-y-1 hover:shadow-md active:scale-[0.98] cursor-default">
                   <p className="font-bold text-blue-600 mb-2">🎨 3D AI Rendering</p>
                   <p className="text-gray-600 dark:text-gray-400">Render avatar hiper-realistis gaya Blender menggunakan AI generatif.</p>
                 </div>
-                <div className="bg-white dark:bg-black p-6 rounded-3xl border border-gray-100 dark:border-neutral-800 sm:col-span-2 text-left">
+                <div className="bg-white dark:bg-black p-6 rounded-3xl border border-gray-100 dark:border-neutral-800 sm:col-span-2 text-left transition-all hover:-translate-y-1 hover:shadow-md active:scale-[0.98] cursor-default">
                   <p className="font-bold text-blue-600 mb-2">📈 Analisis Pasar</p>
                   <p className="text-gray-600 dark:text-gray-400">Investasi rutin aset emas dan pemantauan saham NASDAQ-100 (QQQ) & NVIDIA.</p>
                 </div>
@@ -155,6 +171,111 @@ export default function Home() {
           </div>
         </motion.div>
       </div>
+
+      {/* --- TOMBOL BANTUAN MENGAMBANG --- */}
+      <motion.button
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 1, type: "spring", stiffness: 200 }}
+        onClick={() => setIsIntroOpen(true)}
+        className="fixed bottom-5 right-5 md:bottom-8 md:right-8 z-40 p-3 bg-white dark:bg-[#1a1a1a] text-blue-600 rounded-full shadow-[0_4px_15px_rgb(0,0,0,0.1)] border border-gray-200 dark:border-white/10 hover:bg-blue-50 dark:hover:bg-white/5 hover:scale-110 active:scale-90 transition-all group flex items-center justify-center"
+      >
+        <HelpCircle size={22} strokeWidth={2.5} />
+        <span className="absolute -top-10 right-0 bg-black dark:bg-white text-white dark:text-black text-xs px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap hidden md:block font-medium shadow-md">
+          Butuh panduan?
+        </span>
+      </motion.button>
+
+      {/* --- MODAL INTRO (EFEK PUSARAN / VORTEX) --- */}
+      <AnimatePresence>
+        {isIntroOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[120]" 
+            />
+            {/* Wrapper pembungkus modal, mengatur posisi ke tengah */}
+            <div className="fixed inset-0 flex items-center justify-center z-[121] p-6 pointer-events-none">
+              
+              {/* MODIFIKASI ANIMASI PUSARAN: 
+                  - Rotate: Berputar 45 derajat 
+                  - BorderRadius: Menjadi bulat sempurna (100%) saat terhisap 
+                  - X & Y: Mengarah tajam ke pojok kanan bawah (posisi tombol ?) 
+              */}
+              <motion.div 
+                initial={{ opacity: 0, scale: 0, x: "45vw", y: "45vh", rotate: 45, borderRadius: "100%" }} 
+                animate={{ opacity: 1, scale: 1, x: 0, y: 0, rotate: 0, borderRadius: "2.5rem" }} 
+                exit={{ opacity: 0, scale: 0, x: "45vw", y: "45vh", rotate: -45, borderRadius: "100%" }} 
+                transition={{ type: "spring", stiffness: 220, damping: 25 }}
+                className="bg-white dark:bg-[#121212] w-full max-w-lg shadow-2xl border border-gray-100 dark:border-white/10 p-8 text-left relative overflow-hidden pointer-events-auto"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-bl-full -z-10 blur-2xl"></div>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-blue-50 dark:bg-blue-600/20 text-blue-600 rounded-2xl">
+                    <Sparkles size={24} />
+                  </div>
+                  <h2 className="text-2xl font-bold tracking-tighter text-black dark:text-white">Panduan Website</h2>
+                </div>
+                <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">Selamat datang! Agar pengalaman menjelajah Anda lebih nyaman, berikut adalah fungsi menu di bagian atas layar:</p>
+                
+                <div className="hidden md:block space-y-4 mb-8">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-default">
+                      <p className="font-bold text-black dark:text-white flex items-center gap-2 mb-1"><Layout size={16} className="text-blue-500"/> Home</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Kembali ke beranda utama ini.</p>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-default">
+                      <p className="font-bold text-black dark:text-white flex items-center gap-2 mb-1"><Layout size={16} className="text-blue-500"/> Experience</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Melihat riwayat perjalanan.</p>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-default">
+                      <p className="font-bold text-black dark:text-white flex items-center gap-2 mb-1"><Layout size={16} className="text-blue-500"/> Achievements</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Kumpulan penghargaan saya.</p>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-default">
+                      <p className="font-bold text-black dark:text-white flex items-center gap-2 mb-1"><Layout size={16} className="text-blue-500"/> Projects</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Melihat detail portofolio.</p>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 flex items-start gap-3 cursor-default">
+                    <Moon size={20} className="text-blue-600 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-bold text-black dark:text-white text-sm">Tombol Tema</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">Klik ikon ini untuk mengubah warna website menjadi Terang/Gelap.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="block md:hidden space-y-4 mb-8">
+                  <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-start gap-3">
+                    <Menu size={24} className="text-blue-600 mt-1 shrink-0" />
+                    <div>
+                      <p className="font-bold text-black dark:text-white">Menu Hamburger (☰)</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Ketuk ikon garis tiga di pojok atas untuk membuka daftar halaman.</p>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 flex items-start gap-3">
+                    <Moon size={24} className="text-blue-600 mt-1 shrink-0" />
+                    <div>
+                      <p className="font-bold text-black dark:text-white">Tombol Tema</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Ketuk ikon untuk mengubah tampilan layar Terang atau Gelap.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={closeIntro} 
+                  className="w-full bg-black dark:bg-white text-white dark:text-black py-4 rounded-2xl font-bold text-lg hover:scale-[1.02] active:scale-95 transition-all shadow-lg"
+                >
+                  Paham, Mulai Jelajahi!
+                </button>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* --- MODAL HUBUNGI SAYA --- */}
       <AnimatePresence>
@@ -165,7 +286,7 @@ export default function Home() {
               <div className="bg-white dark:bg-[#121212] w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl pointer-events-auto border border-gray-100 dark:border-white/10 p-8 text-left">
                 <div className="flex justify-between items-center mb-8 text-black dark:text-white">
                   <h2 className="text-2xl font-bold tracking-tighter">Hubungi Saya</h2>
-                  <button onClick={() => setIsContactOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors">
+                  <button onClick={() => setIsContactOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-transform active:scale-90">
                     <X size={20} />
                   </button>
                 </div>
@@ -177,19 +298,11 @@ export default function Home() {
                       href={link.href} 
                       target="_blank" 
                       rel="noopener noreferrer" 
-                      className="flex items-center p-4 rounded-[1.8rem] border border-gray-100 dark:border-white/5 transition-all group hover:bg-blue-50 dark:hover:bg-blue-600/10 hover:border-blue-600/30 text-black dark:text-white"
+                      className="flex items-center p-4 rounded-[1.8rem] border border-gray-100 dark:border-white/5 transition-all group hover:bg-blue-50 dark:hover:bg-blue-600/10 hover:border-blue-600/30 text-black dark:text-white active:scale-95"
                     >
-                      {/* BAGIAN YANG DIUBAH: Hapus p-2.5 dan ganti width/height dengan fill */}
                       <div className="relative w-14 h-14 bg-gray-50 dark:bg-white/5 rounded-2xl mr-5 group-hover:scale-110 transition-transform flex items-center justify-center overflow-hidden">
-                        <Image 
-                          src={link.iconPath} 
-                          alt={link.name} 
-                          fill // Menggunakan fill agar mengikuti ukuran parent (w-14 h-14)
-                          className="object-cover" // Gunakan 'object-cover' agar memenuhi kotak, atau 'object-contain' jika ingin logo utuh terlihat
-                          unoptimized={true} 
-                        />
+                        <Image src={link.iconPath} alt={link.name} fill className="object-cover" unoptimized={true} />
                       </div>
-                      
                       <div className="flex-1">
                         <p className="text-lg font-bold tracking-tight group-hover:text-blue-600 transition-colors">{link.name}</p>
                       </div>
@@ -211,7 +324,7 @@ export default function Home() {
             <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} className="fixed inset-0 flex items-center justify-center z-[101] pointer-events-none p-6">
               <div className="relative w-full max-w-lg aspect-square bg-gray-900 rounded-[3.5rem] overflow-hidden shadow-2xl pointer-events-auto border border-white/10">
                 <Image src="/profile.jpeg" alt="Preview Profil" fill className="object-cover" />
-                <button onClick={() => setIsPreviewOpen(false)} className="absolute top-6 right-6 p-3 bg-black/50 backdrop-blur-md text-white rounded-2xl hover:bg-red-500 transition-all">
+                <button onClick={() => setIsPreviewOpen(false)} className="absolute top-6 right-6 p-3 bg-black/50 backdrop-blur-md text-white rounded-2xl hover:bg-red-500 transition-transform active:scale-90">
                   <X size={24} strokeWidth={2.5} />
                 </button>
               </div>
@@ -222,4 +335,4 @@ export default function Home() {
 
     </main>
   );
-} 
+}

@@ -2,14 +2,13 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Apple, Cpu, Play, BarChart3, Briefcase } from "lucide-react";
+import { X, Apple, Cpu, Play, BarChart3 } from "lucide-react";
 import Card from "../../components/Card";
 
 const projects = [
   {
     id: "fruitsense",
     title: "FruitSense App",
-    // Konten spesifik baru
     tags: ["AI & Mobile", "Marketplace"],
     embedUrl: "https://www.canva.com/design/DAHJjRnShp0/NP4NuZwDhYS4VWi6dQZoYQ/view?embed",
     colorClass: "from-green-100 to-emerald-50 dark:from-emerald-900/20 dark:to-green-900/10",
@@ -18,7 +17,6 @@ const projects = [
   {
     id: "fortunas",
     title: "Fortunas AI",
-    // Konten spesifik baru
     tags: ["Business Intelligence", "Assistant Management"],
     embedUrl: "https://www.canva.com/design/DAHJjUdm9xQ/9zYv0ehSrRekGfcrBe9ktw/view?embed",
     colorClass: "from-blue-100 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/10",
@@ -53,6 +51,8 @@ export default function Projects() {
               key={project.id} 
               layoutId={project.id} 
               onClick={() => setSelectedId(project.id)} 
+              // TAMBAHAN: Efek klik membal pada Card Project
+              whileTap={{ scale: 0.95 }}
               className="cursor-pointer group"
             >
               <Card className="p-0 overflow-hidden flex flex-col h-full border-none bg-gray-50 dark:bg-neutral-900/40 relative">
@@ -65,7 +65,6 @@ export default function Projects() {
                     {project.vectorIcon}
                   </motion.div>
 
-                  {/* Play Button Overlay */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
                     <div className="opacity-0 group-hover:opacity-100 p-4 bg-white/90 dark:bg-blue-600 text-blue-600 dark:text-white rounded-full translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-xl">
                       <Play size={28} fill="currentColor" />
@@ -73,13 +72,12 @@ export default function Projects() {
                   </div>
                 </div>
 
-                {/* INFO AREA - Bersih tanpa ikon kecil */}
+                {/* INFO AREA */}
                 <div className="p-8">
                   <h2 className="text-3xl font-bold tracking-tighter mb-4 group-hover:text-blue-600 transition-colors">
                     {project.title}
                   </h2>
                   
-                  {/* Badge Konten Spesifik (Style Samsung One UI) */}
                   <div className="flex flex-wrap gap-2">
                     {project.tags.map((tag, index) => (
                       <span 
@@ -96,7 +94,7 @@ export default function Projects() {
           ))}
         </div>
 
-        {/* MODAL PLAYER (Menindih Tengah) */}
+        {/* MODAL PLAYER */}
         <AnimatePresence>
           {selectedId && (
             <>
@@ -115,7 +113,8 @@ export default function Projects() {
                 >
                   <button 
                     onClick={() => setSelectedId(null)}
-                    className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-red-500 backdrop-blur-md text-white rounded-2xl z-[102] transition-all"
+                    // TAMBAHAN: Efek klik membal pada tombol close
+                    className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-red-500 backdrop-blur-md text-white rounded-2xl z-[102] transition-transform active:scale-90"
                   >
                     <X size={24} strokeWidth={2.5} />
                   </button>
