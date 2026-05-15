@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Card from "../../components/Card";
 import { X, ArrowRight, Award, Calendar, ExternalLink } from "lucide-react";
 import Image from "next/image";
-import HelpButton from "../../components/element/help"; 
+import HelpButton from "../../components/element/help";
 import IntroModal from "../../components/element/IntroModal";
 
 export default function Achievements() {
@@ -37,7 +37,7 @@ export default function Achievements() {
       <motion.div variants={containerVariants} initial="hidden" animate="visible" className="max-w-5xl mx-auto">
         <motion.div variants={itemVariants} className="mb-16">
           <h1 className="text-5xl md:text-6xl font-extrabold mb-4 tracking-tighter italic">Pencapaian <span className="text-blue-600">&</span> Penghargaan.</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl">Kumpulan sertifikasi, kompetisi, dan pengakuan akademik yang telah saya raih sepanjang perjalanan studi dan karier profesional.</p>
+          <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl font-medium">Kumpulan sertifikasi kompetensi, medali internasional, dan pengakuan riset akademik yang divalidasi oleh institusi global.</p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -46,7 +46,7 @@ export default function Achievements() {
               <Card className="group h-full flex flex-col justify-between border-none bg-gray-50 dark:bg-neutral-900/50 hover:bg-white dark:hover:bg-neutral-800 transition-all border border-transparent hover:border-blue-600/30 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 rounded-[2rem] p-8">
                 <div>
                   <div className="flex justify-between items-start mb-4"><div className="p-3 bg-blue-100 dark:bg-blue-600/20 text-blue-600 rounded-2xl"><Award size={24} /></div><span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 bg-gray-200/50 dark:bg-white/5 px-3 py-1 rounded-full">{ach.date.split(" ").pop()}</span></div>
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-blue-600 transition-colors">{ach.title}</h3>
+                  <h3 className="text-xl font-bold mb-2 group-hover:text-blue-600 transition-colors italic tracking-tight">{ach.title}</h3>
                   <p className="text-gray-600 dark:text-gray-400 font-medium text-sm mb-6 flex items-center gap-2"><ExternalLink size={14} className="text-blue-600" /> {ach.provider}</p>
                 </div>
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-white/5">
@@ -67,22 +67,13 @@ export default function Achievements() {
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedCert(null)} className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[150] cursor-zoom-out" />
             <motion.div initial={{ opacity: 0, scale: 0.9, y: 40 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 40 }} className="fixed inset-0 flex items-center justify-center z-[151] pointer-events-none p-6">
-              <div className="relative w-full max-w-4xl bg-white dark:bg-neutral-900 rounded-t-[1.5rem] md:rounded-t-[2.5rem] rounded-b-none overflow-hidden shadow-2xl pointer-events-auto border border-gray-200 dark:border-white/10">
+              <div className="relative w-full max-w-4xl bg-white dark:bg-neutral-900 rounded-[2.5rem] overflow-hidden shadow-2xl pointer-events-auto border border-gray-200 dark:border-white/10">
                 <div className="p-6 md:px-10 flex justify-between items-center border-b dark:border-white/5 bg-white dark:bg-neutral-900">
                   <div><h2 className="text-xl font-bold italic">{selectedCert.title}</h2><p className="text-sm text-blue-600 font-medium">{selectedCert.provider}</p></div>
                   <button onClick={() => setSelectedCert(null)} className="p-3 bg-gray-100 dark:bg-white/5 rounded-2xl hover:bg-red-500 hover:text-white transition-all active:scale-90"><X size={24} /></button>
                 </div>
-                <div className="bg-gray-50 dark:bg-black w-full overflow-hidden">
-                  {selectedCert.image.endsWith('.pdf') ? (
-                    <div className="w-full aspect-video"><iframe src={`${selectedCert.image}#toolbar=0`} className="w-full h-full" title={selectedCert.title} /></div>
-                  ) : (
-                    <div className="w-full flex flex-col">
-                      <Image src={selectedCert.image} alt={selectedCert.title} width={1200} height={800} className="w-full h-auto object-contain" unoptimized />
-                      {selectedCert.pdfLink && (
-                        <div className="p-6 flex justify-center bg-gray-50 dark:bg-black/40"><a href={selectedCert.pdfLink} target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-blue-700 shadow-xl transition-all active:scale-95"><ExternalLink size={16} /> Lihat List Juara Lengkap (PDF)</a></div>
-                      )}
-                    </div>
-                  )}
+                <div className="bg-gray-50 dark:bg-black w-full overflow-hidden flex flex-col items-center">
+                  <Image src={selectedCert.image} alt={selectedCert.title} width={1200} height={800} className="w-full h-auto object-contain max-h-[70vh]" unoptimized />
                 </div>
               </div>
             </motion.div>

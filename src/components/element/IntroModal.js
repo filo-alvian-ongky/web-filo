@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Layout, Menu, Moon } from "lucide-react";
+import { Sparkles, Layout, Menu, Moon, Bot } from "lucide-react"; // Tambahkan import Bot
 
 export default function IntroModal({ isOpen, onClose }) {
   return (
@@ -27,16 +27,36 @@ export default function IntroModal({ isOpen, onClose }) {
               </div>
               <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">Selamat datang! Agar pengalaman menjelajah Anda lebih nyaman, berikut adalah fungsi menu di bagian atas layar:</p>
               
+              {/* DESKTOP LAYOUT (TANPA HAMBURGER MENU) */}
               <div className="hidden md:block space-y-4 mb-8">
+                {/* Baris Navigasi */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-default"><p className="font-bold text-black dark:text-white flex items-center gap-2 mb-1"><Layout size={16} className="text-blue-500"/> Home</p><p className="text-xs text-gray-500 dark:text-gray-400">Kembali ke beranda utama ini.</p></div>
                   <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-default"><p className="font-bold text-black dark:text-white flex items-center gap-2 mb-1"><Layout size={16} className="text-blue-500"/> Experience</p><p className="text-xs text-gray-500 dark:text-gray-400">Melihat riwayat perjalanan.</p></div>
                   <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-default"><p className="font-bold text-black dark:text-white flex items-center gap-2 mb-1"><Layout size={16} className="text-blue-500"/> Achievements</p><p className="text-xs text-gray-500 dark:text-gray-400">Kumpulan penghargaan saya.</p></div>
                   <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-default"><p className="font-bold text-black dark:text-white flex items-center gap-2 mb-1"><Layout size={16} className="text-blue-500"/> Projects</p><p className="text-xs text-gray-500 dark:text-gray-400">Melihat detail portofolio.</p></div>
                 </div>
-                <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 flex items-start gap-3 cursor-default"><Moon size={20} className="text-blue-600 mt-0.5 shrink-0" /><div><p className="font-bold text-black dark:text-white text-sm">Tombol Tema</p><p className="text-xs text-gray-600 dark:text-gray-400">Klik ikon ini untuk mengubah warna website menjadi Terang/Gelap.</p></div></div>
+                
+                {/* Baris Utilitas: AI & Tema */}
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div className="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/30 flex items-start gap-3 cursor-default">
+                    <Bot size={20} className="text-indigo-600 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-bold text-black dark:text-white text-sm">AI Assistant</p>
+                      <p className="text-[11px] text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">Tanya AI seputar karir & portofolio saya.</p>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 flex items-start gap-3 cursor-default">
+                    <Moon size={20} className="text-blue-600 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-bold text-black dark:text-white text-sm">Tombol Tema</p>
+                      <p className="text-[11px] text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">Ubah warna website menjadi Terang/Gelap.</p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
+              {/* MOBILE LAYOUT (DENGAN HAMBURGER MENU) */}
               <div className="block md:hidden space-y-4 mb-8">
                 <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-start gap-3"><Menu size={24} className="text-blue-600 mt-1 shrink-0" /><div><p className="font-bold text-black dark:text-white">Menu Hamburger (☰)</p><p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Ketuk ikon garis tiga di pojok atas untuk membuka daftar halaman.</p></div></div>
                 <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 flex items-start gap-3"><Moon size={24} className="text-blue-600 mt-1 shrink-0" /><div><p className="font-bold text-black dark:text-white">Tombol Tema</p><p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Ketuk ikon untuk mengubah tampilan layar Terang atau Gelap.</p></div></div>

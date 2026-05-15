@@ -25,7 +25,7 @@ export default function HelpButton({ onClick }) {
       aria-label="Buka Panduan Navigasi"
     >
       <HelpCircle size={22} strokeWidth={2.5} />
-      <span className="absolute -top-10 right-0 bg-black dark:bg-white text-white dark:text-black text-xs px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap hidden md:block font-medium shadow-md">
+      <span className="absolute -top-10 right-0 bg-black dark:bg-white text-white dark:text-black text-[10px] px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap hidden md:block font-bold shadow-md uppercase tracking-tighter">
         Butuh panduan?
       </span>
     </motion.button>
