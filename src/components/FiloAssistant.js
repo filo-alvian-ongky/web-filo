@@ -8,7 +8,6 @@ export default function FiloAssistant({ isOpen, onClose }) {
   const [messages, setMessages] = useState([
     { 
       role: "assistant", 
-      // Sapaan disesuaikan agar lebih profesional dan tidak terlalu panjang
       content: "Halo! Saya AI asisten portofolio Filo. Ada yang ingin Anda ketahui tentang proyek, publikasi riset, atau pengalaman kerja Filo?" 
     }
   ]);
@@ -16,19 +15,18 @@ export default function FiloAssistant({ isOpen, onClose }) {
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef(null);
   
-  // State untuk mendeteksi apakah layar saat ini Mobile atau Desktop
+  // 🔒 Synchronous Lock untuk menangkal balapan state (race condition) akibat dual-hit Enter
+  const isSendingRef = useRef(false); 
+  
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Fungsi mengecek lebar layar (768px adalah breakpoint 'md' di Tailwind)
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 768);
     };
     
-    // Cek saat pertama kali komponen dimuat
     checkScreenSize();
 
-    // Pasang event listener jika user meresize browser
     window.addEventListener("resize", checkScreenSize);
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
@@ -40,12 +38,16 @@ export default function FiloAssistant({ isOpen, onClose }) {
   }, [messages, isTyping]);
 
   const sendMessage = async () => {
-    if (!input.trim() || isTyping) return;
+    // Pengaman Ganda: Cek teks kosong, status state, dan status Ref Lock
+    if (!input.trim() || isTyping || isSendingRef.current) return;
+
+    // Kunci jalur secara synchronous seketika sebelum async dijalankan
+    isSendingRef.current = true;
+    setIsTyping(true);
 
     const userMsg = { role: "user", content: input };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
-    setIsTyping(true);
 
     try {
       const response = await fetch("/api/chat", {
@@ -66,19 +68,28 @@ export default function FiloAssistant({ isOpen, onClose }) {
       }]);
     } finally {
       setIsTyping(false);
+      // Buka kembali kunci setelah seluruh proses request selesai
+      isSendingRef.current = false; 
+    }
+  };
+
+  // 🛡️ Gerbang Filter Keyboard untuk mengunci spamming Enter
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      // Menyetop aksi bawaan browser (mencegah double trigger / skip baris)
+      e.preventDefault(); 
+      sendMessage();
     }
   };
 
   // 🚀 LOGIKA ANIMASI DINAMIS (RESPONSIVE ANIMATION)
   const animationVariants = isMobile
     ? {
-        // MOBILE: Slide dari bawah (Y axis)
         initial: { opacity: 0, y: "100%" },
         animate: { opacity: 1, y: 0 },
         exit: { opacity: 0, y: "100%" },
       }
     : {
-        // DESKTOP: Slide dari samping kanan (X axis)
         initial: { opacity: 0, x: 100 },
         animate: { opacity: 1, x: 0 },
         exit: { opacity: 0, x: 100 },
@@ -88,11 +99,9 @@ export default function FiloAssistant({ isOpen, onClose }) {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          // Terapkan varian animasi berdasarkan deteksi layar
           initial={animationVariants.initial}
           animate={animationVariants.animate}
           exit={animationVariants.exit}
-          // Transisi tipe pegas (spring) untuk efek slide yang elegan
           transition={{ type: "spring", damping: 25, stiffness: 200 }}
           className="fixed bottom-0 right-0 md:bottom-24 md:right-8 z-[999] w-full md:w-[400px] h-[calc(100vh-80px)] md:h-[550px] bg-white dark:bg-[#0d0d0d] border-t md:border border-gray-200 dark:border-white/10 rounded-t-[2rem] md:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden"
         >
@@ -143,7 +152,7 @@ export default function FiloAssistant({ isOpen, onClose }) {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                onKeyDown={handleKeyDown} // 👈 Menggunakan fungsi filter baru kita
                 placeholder="Tanyakan riset atau proyek Filo..."
                 className="w-full bg-white dark:bg-neutral-800 border-none rounded-2xl px-5 py-3.5 text-sm shadow-inner focus:ring-2 ring-blue-500/50 outline-none transition-all dark:text-white placeholder:text-gray-400"
               />
