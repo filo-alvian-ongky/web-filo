@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, X, Bot, Zap } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 export default function FiloAssistant({ isOpen, onClose }) {
   const [messages, setMessages] = useState([
@@ -15,7 +16,6 @@ export default function FiloAssistant({ isOpen, onClose }) {
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef(null);
   
-  // 🔒 Synchronous Lock untuk menangkal balapan state (race condition) akibat dual-hit Enter
   const isSendingRef = useRef(false); 
   
   const [isMobile, setIsMobile] = useState(false);
@@ -38,10 +38,8 @@ export default function FiloAssistant({ isOpen, onClose }) {
   }, [messages, isTyping]);
 
   const sendMessage = async () => {
-    // Pengaman Ganda: Cek teks kosong, status state, dan status Ref Lock
     if (!input.trim() || isTyping || isSendingRef.current) return;
 
-    // Kunci jalur secara synchronous seketika sebelum async dijalankan
     isSendingRef.current = true;
     setIsTyping(true);
 
@@ -68,21 +66,17 @@ export default function FiloAssistant({ isOpen, onClose }) {
       }]);
     } finally {
       setIsTyping(false);
-      // Buka kembali kunci setelah seluruh proses request selesai
       isSendingRef.current = false; 
     }
   };
 
-  // 🛡️ Gerbang Filter Keyboard untuk mengunci spamming Enter
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      // Menyetop aksi bawaan browser (mencegah double trigger / skip baris)
       e.preventDefault(); 
       sendMessage();
     }
   };
 
-  // 🚀 LOGIKA ANIMASI DINAMIS (RESPONSIVE ANIMATION)
   const animationVariants = isMobile
     ? {
         initial: { opacity: 0, y: "100%" },
@@ -108,7 +102,7 @@ export default function FiloAssistant({ isOpen, onClose }) {
           {/* Header */}
           <div className="p-5 bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex justify-between items-center shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
+              <div className="w-10 h-10 bg-white/25 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
                 <Bot size={22} />
               </div>
               <div>
@@ -124,16 +118,32 @@ export default function FiloAssistant({ isOpen, onClose }) {
             </button>
           </div>
 
-          {/* Chat History */}
+          {/* Chat History dengan ReactMarkdown untuk styling format teks */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4 dark:bg-neutral-900/20">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[85%] p-4 rounded-2xl text-[13px] leading-relaxed shadow-sm whitespace-pre-wrap ${
+                <div className={`max-w-[85%] p-4 rounded-2xl text-[13px] leading-relaxed shadow-sm ${
                   msg.role === "user" 
-                  ? "bg-blue-600 text-white rounded-tr-none" 
-                  : "bg-gray-50 dark:bg-white/5 text-gray-800 dark:text-gray-200 rounded-tl-none border border-gray-100 dark:border-white/5"
+                  ? "bg-blue-600 text-white rounded-tr-none whitespace-pre-wrap" 
+                  : "bg-gray-50 dark:bg-white/5 text-gray-800 dark:text-gray-200 rounded-tl-none border border-gray-100 dark:border-white/5 prose dark:prose-invert max-w-none"
                 }`}>
-                  {msg.content}
+                  {msg.role === "user" ? (
+                    msg.content
+                  ) : (
+                    <ReactMarkdown
+                      components={{
+                        // Mengatur gaya elemen hasil markdown agar rapi di dalam chat bubble
+                        p: ({ node, ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                        ul: ({ node, ...props }) => <ul className="list-disc pl-4 mb-2 space-y-1" {...props} />,
+                        ol: ({ node, ...props }) => <ol className="list-decimal pl-4 mb-2 space-y-1" {...props} />,
+                        li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
+                        strong: ({ node, ...props }) => <strong className="font-semibold text-blue-600 dark:text-blue-400" {...props} />,
+                        em: ({ node, ...props }) => <em className="italic" {...props} />,
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
+                  )}
                 </div>
               </div>
             ))}
@@ -152,7 +162,7 @@ export default function FiloAssistant({ isOpen, onClose }) {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown} // 👈 Menggunakan fungsi filter baru kita
+                onKeyDown={handleKeyDown}
                 placeholder="Tanyakan riset atau proyek Filo..."
                 className="w-full bg-white dark:bg-neutral-800 border-none rounded-2xl px-5 py-3.5 text-sm shadow-inner focus:ring-2 ring-blue-500/50 outline-none transition-all dark:text-white placeholder:text-gray-400"
               />

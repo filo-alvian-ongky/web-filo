@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Layout, Menu, Moon, Bot } from "lucide-react"; // Tambahkan import Bot
+import { Sparkles, Layout, Menu, Moon, Bot } from "lucide-react";
 
 export default function IntroModal({ isOpen, onClose }) {
   return (
