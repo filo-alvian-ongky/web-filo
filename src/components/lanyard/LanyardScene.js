@@ -46,6 +46,8 @@ const disposeTextures = (t) => [t.front, t.back, t.band].forEach((x) => x.dispos
 
 const CAMERA = { fov: 25, near: 9.6, far: 13 };
 const cameraZ = (width) => (width < 640 ? CAMERA.near : CAMERA.far);
+// Di HP kamera sedikit diturunkan: kartu tampil lebih tinggi sehingga ada ruang untuk tombol di bawahnya
+const cameraY = (width) => (width < 640 ? -0.25 : 0);
 
 // Event pointer dihitung dari posisi kanvas di layar, sehingga kanvas boleh
 // menerima event dari elemen induk (eventSource) tanpa menghalangi klik tombol.
@@ -304,7 +306,7 @@ function ResponsiveCamera() {
   const camera = useThree((state) => state.camera);
   const width = useThree((state) => state.size.width);
   useEffect(() => {
-    camera.position.set(0, 0, cameraZ(width));
+    camera.position.set(0, cameraY(width), cameraZ(width));
     camera.updateProjectionMatrix();
   }, [camera, width]);
   return null;

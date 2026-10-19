@@ -45,7 +45,7 @@ export default function Home() {
             variants={stagger(0.15)}
             initial="hidden"
             animate="visible"
-            className="px-4 md:px-0 md:col-span-7 flex flex-col justify-center items-center md:items-start text-center md:text-left pb-6 md:pt-24 md:pb-16"
+            className="px-4 md:px-0 md:col-span-7 flex flex-col justify-center items-center md:items-start text-center md:text-left pt-4 pb-6 md:pt-24 md:pb-16"
           >
             <motion.span
               variants={fadeUp}

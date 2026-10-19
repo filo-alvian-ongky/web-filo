@@ -14,13 +14,29 @@ import { useSlidingPill } from "./ui/useSlidingPill";
 
 export const isActivePath = (pathname, path) => (path === "/" ? pathname === "/" : pathname?.startsWith(path));
 
-export function Logo({ compactUntilLg = false }) {
+/**
+ * Logo + teks di sampingnya. Bila `title` diisi (halaman selain Beranda yang sudah digulir),
+ * teks "FiloAlvian.com" berganti menjadi nama halaman dengan animasi geser ala iOS.
+ */
+export function Logo({ compactUntilLg = false, title = null }) {
   const { t } = useLang();
+  const swap = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -12 }, transition: { duration: 0.22 } };
   return (
     <Link href="/" aria-label={`${profile.domain} — ${t.home}`} className="pressable inline-flex items-center gap-2.5 shrink-0">
       <BrandLogo className="w-9 h-9 text-fg transition-colors" />
-      <span className={`text-[17px] font-bold tracking-tight text-fg ${compactUntilLg ? "hidden lg:inline" : ""}`}>
-        <span className="text-accent-fg">FiloAlvian</span>.com
+      {/* Kedua teks ditumpuk di sel grid yang sama agar bisa bertukar tanpa lompatan layout */}
+      <span className={`grid items-center overflow-hidden py-0.5 text-[17px] font-bold tracking-tight text-fg ${compactUntilLg ? "hidden lg:grid" : ""}`}>
+        <AnimatePresence initial={false}>
+          {title ? (
+            <motion.span key={title} {...swap} className="[grid-area:1/1] whitespace-nowrap">
+              {title}
+            </motion.span>
+          ) : (
+            <motion.span key="brand" {...swap} className="[grid-area:1/1] whitespace-nowrap">
+              <span className="text-accent-fg">FiloAlvian</span>.com
+            </motion.span>
+          )}
+        </AnimatePresence>
       </span>
     </Link>
   );
@@ -170,25 +186,8 @@ export default function Navbar() {
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
         <div className="relative h-14 pl-4 pr-2 flex items-center justify-between">
-          <motion.div animate={{ opacity: compactTitle ? 0 : 1, y: compactTitle ? -6 : 0 }} transition={{ duration: 0.2 }}>
-            <Logo />
-          </motion.div>
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <AnimatePresence>
-              {compactTitle && (
-                <motion.p
-                  key={compactTitle}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 8 }}
-                  transition={{ duration: 0.2 }}
-                  className="text-[17px] font-semibold text-fg"
-                >
-                  {compactTitle}
-                </motion.p>
-              )}
-            </AnimatePresence>
-          </div>
+          {/* Logo tetap; teks di sampingnya berganti jadi nama halaman saat digulir (Beranda tetap FiloAlvian.com) */}
+          <Logo title={compactTitle} />
           <div className="relative flex items-center">
             <LanguageButton />
             <HelpButton />

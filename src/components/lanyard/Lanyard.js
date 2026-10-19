@@ -78,7 +78,7 @@ export default function Lanyard({ profile, onTap, eventSource, anchorRef, classN
         fallback={<StaticBadge profile={profile} />}
       />
 
-      {/* Tombol balik kartu — diletakkan tepat di bawah kartu yang tergantung */}
+      {/* Tombol balik kartu — di HP menempel ke bawah area lanyard, di desktop tepat di bawah kartu */}
       <motion.button
         type="button"
         onClick={() => setFlipped((f) => !f)}
@@ -90,7 +90,7 @@ export default function Lanyard({ profile, onTap, eventSource, anchorRef, classN
         transition={{ delay: 1.2, duration: 0.5 }}
         whileTap={{ scale: 0.94 }}
         style={{ left: `${anchor * 100}%` }}
-        className="pointer-events-auto absolute top-[91%] md:top-[81%] -translate-x-1/2 inline-flex items-center gap-1.5 h-9 pl-3 pr-3.5 rounded-full glass shadow-float text-[13px] font-semibold text-fg"
+        className="pointer-events-auto absolute bottom-4 md:bottom-auto md:top-[81%] -translate-x-1/2 inline-flex items-center gap-1.5 h-9 pl-3 pr-3.5 rounded-full glass shadow-float text-[13px] font-semibold text-fg"
       >
         <motion.span animate={{ rotate: flipped ? 180 : 0 }} transition={spring.pop} className="grid place-items-center">
           <RotateCw size={15} strokeWidth={2.5} />
