@@ -204,7 +204,7 @@ export default function FiloAssistant() {
                   onKeyDown={handleKeyDown}
                   placeholder={t.aiPlaceholder}
                   aria-label={t.aiInput}
-                  className="flex-1 min-w-0 bg-transparent outline-none text-[15px] text-fg placeholder:text-fg-3"
+                  className="flex-1 min-w-0 bg-transparent outline-none text-base md:text-[15px] text-fg placeholder:text-fg-3"
                 />
                 <button
                   onClick={() => sendMessage()}

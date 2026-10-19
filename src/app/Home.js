@@ -38,7 +38,7 @@ export default function Home() {
           anchorRef={slotRef}
           className="pointer-events-none relative z-10 h-[56svh] min-h-[390px] max-h-[520px] md:absolute md:inset-0 md:h-auto md:min-h-0 md:max-h-none"
         />
-        <div className="mx-auto max-w-6xl md:px-6 grid md:grid-cols-12 md:min-h-[max(100svh,680px)]">
+        <div className="mx-auto max-w-6xl md:px-6 grid grid-cols-1 md:grid-cols-12 md:min-h-[max(100svh,680px)]">
           <div ref={slotRef} aria-hidden className="hidden md:block md:order-last md:col-span-5" />
 
           <motion.div
@@ -64,7 +64,7 @@ export default function Home() {
             <motion.div
               variants={fadeUp}
               aria-hidden
-              className="mt-5 w-full min-h-[1.15em] whitespace-nowrap text-[clamp(2rem,8.4vw,4.75rem)] font-extrabold tracking-tight leading-[1.1] text-fg"
+              className="mt-5 w-full min-h-[1.15em] whitespace-nowrap text-[clamp(1.75rem,8.4vw,4.75rem)] font-extrabold tracking-tight leading-[1.1] text-fg"
             >
               <Typewriter
                 key={lang}
@@ -135,7 +135,7 @@ export default function Home() {
             initial="hidden"
             whileInView="visible"
             viewport={viewportOnce}
-            className="grid md:grid-cols-3 gap-3 md:gap-4"
+            className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4"
           >
             {focusAreas.map((f) => {
               const Icon = f.icon;
@@ -160,7 +160,7 @@ export default function Home() {
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
-          className="mx-auto max-w-6xl grid md:grid-cols-5 gap-3 md:gap-4"
+          className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-4"
         >
           <Card className="md:col-span-2 p-6 md:p-7">
             <h2 className="text-lg font-bold text-fg">{t.techTitle}</h2>

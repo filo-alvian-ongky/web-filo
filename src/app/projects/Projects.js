@@ -34,7 +34,7 @@ export default function Projects() {
       <PageHeader eyebrow={t.projEyebrow} title={t.projTitle} description={t.projDesc} />
 
       <section className="px-4 md:px-6">
-        <motion.div variants={stagger(0.15, 0.2)} initial="hidden" animate="visible" className="mx-auto max-w-6xl grid md:grid-cols-2 gap-4 md:gap-6">
+        <motion.div variants={stagger(0.15, 0.2)} initial="hidden" animate="visible" className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {projects.map((p) => (
             <motion.div key={p.id} variants={fadeUp}>
               <motion.button

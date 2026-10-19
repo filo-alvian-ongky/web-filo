@@ -41,7 +41,7 @@ export default function Footer() {
   return (
     <footer className="px-4 md:px-6 pt-10 pb-32 md:pb-10">
       <motion.div variants={stagger(0.12)} initial="hidden" whileInView="visible" viewport={viewportOnce} className="mx-auto max-w-6xl">
-        <motion.div variants={fadeUp} className="card relative overflow-hidden p-6 md:p-12 grid gap-10 md:grid-cols-2 md:items-center">
+        <motion.div variants={fadeUp} className="card relative overflow-hidden p-6 md:p-12 grid grid-cols-1 gap-10 md:grid-cols-2 md:items-center">
           <div aria-hidden className="pointer-events-none absolute -top-24 -left-24 w-72 h-72 rounded-full bg-accent/15 blur-3xl" />
           <div className="relative">
             <p className="text-sm font-semibold text-accent-fg mb-2">{t.letsWork}</p>

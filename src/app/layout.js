@@ -17,6 +17,9 @@ export const metadata = {
 export const viewport = {
   width: "device-width",
   initialScale: 1,
+  // Tampilan dikunci seperti aplikasi: tidak bisa di-zoom (pinch / ketuk dua kali)
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#f3f4f6" },

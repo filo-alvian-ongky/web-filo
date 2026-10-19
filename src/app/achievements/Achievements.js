@@ -41,7 +41,7 @@ export default function Achievements() {
       </PageHeader>
 
       <section className="px-4 md:px-6">
-        <motion.div layout className="mx-auto max-w-6xl grid sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
+        <motion.div layout className="mx-auto max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
           <AnimatePresence mode="popLayout" initial={false}>
             {list.map((a, i) => (
               <motion.button
