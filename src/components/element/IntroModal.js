@@ -37,44 +37,56 @@ export default function IntroModal() {
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={closeIntro}
           />
-          <div className="absolute inset-0 flex items-center justify-center p-5 pointer-events-none">
+          {/* Area aman: popup tidak pernah menyentuh tepi layar / status bar / gesture bar */}
+          <div
+            className="absolute inset-0 flex items-center justify-center px-6 md:p-5 pointer-events-none"
+            style={{ paddingTop: "max(env(safe-area-inset-top), 1.5rem)", paddingBottom: "max(env(safe-area-inset-bottom), 1.5rem)" }}
+          >
             <motion.div
               role="dialog"
               aria-modal="true"
               aria-labelledby="intro-title"
               initial={{ opacity: 0, scale: 0.1, x: "40vw", y: "-42vh", skewY: 30, borderRadius: "100%" }}
-              animate={{ opacity: 1, scale: 1, x: 0, y: 0, skewY: 0, borderRadius: "2rem" }}
+              animate={{ opacity: 1, scale: 1, x: 0, y: 0, skewY: 0, borderRadius: "1.75rem" }}
               exit={{ opacity: 0, scale: 0, x: "40vw", y: "-42vh", skewY: 30, borderRadius: "100%" }}
               transition={spring.genie}
-              className="pointer-events-auto relative w-full max-w-lg overflow-hidden bg-surface shadow-float p-6 md:p-8 origin-top-right"
+              className="pointer-events-auto relative w-full max-w-[21rem] md:max-w-lg max-h-full flex flex-col overflow-hidden bg-surface shadow-float origin-top-right"
             >
               <div aria-hidden className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-accent/15 blur-3xl" />
-              <div className="relative">
-                <div className="grid place-items-center w-14 h-14 rounded-[18px] bg-accent text-white mb-5 shadow-[0_10px_24px_-10px_rgba(10,108,245,0.8)]">
-                  <LayoutGrid size={26} />
+
+              {/* Isi bisa digulir bila layar pendek atau ukuran huruf perangkat diperbesar */}
+              <div className="relative flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 pt-5 pb-2 md:px-8 md:pt-8">
+                <div className="grid place-items-center w-11 h-11 md:w-14 md:h-14 rounded-[14px] md:rounded-[18px] bg-accent text-white mb-4 md:mb-5 shadow-[0_10px_24px_-10px_rgba(10,108,245,0.8)]">
+                  <LayoutGrid className="w-[22px] h-[22px] md:w-[26px] md:h-[26px]" />
                 </div>
-                <h2 id="intro-title" className="text-2xl md:text-3xl font-extrabold tracking-tight text-fg">
+                <h2 id="intro-title" className="text-[1.375rem] md:text-3xl leading-tight font-extrabold tracking-tight text-fg">
                   {t.welcome}
                 </h2>
-                <p className="mt-2 text-fg-2 leading-relaxed">{t.welcomeSub}</p>
+                <p className="mt-1.5 md:mt-2 text-sm md:text-base text-fg-2 leading-relaxed">{t.welcomeSub}</p>
 
-                <ul className="mt-6 space-y-4">
+                <ul className="mt-5 md:mt-6 space-y-3.5 md:space-y-4">
                   {ITEMS.map((item) => (
-                    <li key={item.title} className="flex items-start gap-4">
-                      <span className="grid place-items-center w-10 h-10 rounded-[12px] text-white shrink-0" style={{ background: item.tone }}>
-                        <item.icon size={20} />
+                    <li key={item.title} className="flex items-start gap-3 md:gap-4">
+                      <span
+                        className="grid place-items-center w-9 h-9 md:w-10 md:h-10 rounded-[11px] md:rounded-[12px] text-white shrink-0"
+                        style={{ background: item.tone }}
+                      >
+                        <item.icon className="w-[18px] h-[18px] md:w-5 md:h-5" />
                       </span>
-                      <div>
-                        <p className="font-semibold text-fg">{t[item.title]}</p>
-                        {item.body && <p className="text-sm text-fg-2 leading-relaxed">{t[item.body]}</p>}
+                      <div className="min-w-0 pt-px">
+                        <p className="text-[15px] md:text-base font-semibold text-fg leading-snug">{t[item.title]}</p>
+                        {item.body && <p className="text-[13px] md:text-sm text-fg-2 leading-snug md:leading-relaxed">{t[item.body]}</p>}
                         {item.desktop && <p className="hidden md:block text-sm text-fg-2 leading-relaxed">{t[item.desktop]}</p>}
-                        {item.mobile && <p className="md:hidden text-sm text-fg-2 leading-relaxed">{t[item.mobile]}</p>}
+                        {item.mobile && <p className="md:hidden text-[13px] text-fg-2 leading-snug">{t[item.mobile]}</p>}
                       </div>
                     </li>
                   ))}
                 </ul>
+              </div>
 
-                <button onClick={closeIntro} className={`${btn.primary} w-full mt-8 h-14 text-base`}>
+              {/* Tombol selalu terlihat di bawah */}
+              <div className="relative shrink-0 px-5 pt-3 pb-5 md:px-8 md:pt-4 md:pb-8">
+                <button onClick={closeIntro} className={`${btn.primary} w-full h-12 md:h-14 text-[15px] md:text-base`}>
                   {t.guideCta}
                 </button>
               </div>
