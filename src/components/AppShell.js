@@ -11,6 +11,7 @@ import Footer from "./Footer";
 import ContactSheet from "./ContactSheet";
 import IntroModal from "./element/IntroModal";
 import FiloAssistant from "./FiloAssistant";
+import ParticleNetwork from "./ParticleNetwork";
 
 // Judul tab browser ikut bahasa yang dipilih (metadata server tetap versi Indonesia)
 const TITLES = {
@@ -44,6 +45,7 @@ export default function AppShell({ children }) {
       {/* Hormati pengaturan "kurangi gerakan" di perangkat pengguna */}
       <MotionConfig reducedMotion="user">
         <DocumentTitle />
+        <ParticleNetwork />
         <Navbar />
         <main id="konten" className="min-h-svh">
           {children}
