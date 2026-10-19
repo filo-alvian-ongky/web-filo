@@ -1,24 +1,42 @@
-"use client"; // Ubah menjadi client component
-
-import { useState } from "react";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import Navbar from "../components/Navbar";
-import FiloAssistant from "../components/FiloAssistant";
+import AppShell from "../components/AppShell";
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-jakarta",
+  display: "swap",
+});
+
+export const metadata = {
+  title: "Portfolio Filo Alvian Ongky - Mahasiswa Ilmu Komputer & Pengembang",
+  description:
+    "Situs web pribadi Filo Alvian Ongky, Mahasiswa Ilmu Komputer di BINUS University yang berfokus pada pengembangan sistem cerdas, UI/UX, dan riset IoT.",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f3f4f6" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
+};
+
+// Dijalankan sebelum halaman tampil agar tidak ada "kedipan" tema & bahasa.
+// Tanpa pilihan tersimpan, tema mengikuti pengaturan perangkat (seperti iOS / One UI)
+// dan bahasa default-nya Indonesia.
+const themeInitScript = `(function(){try{var h=document.documentElement;var s=localStorage.getItem('theme');var d=s?s==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)h.classList.add('dark');if(localStorage.getItem('lang')==='en')h.lang='en';}catch(e){}})();`;
 
 export default function RootLayout({ children }) {
-  // State global untuk membuka/menutup AI
-  const [isAiOpen, setIsAiOpen] = useState(false);
-
   return (
-    <html lang="id" className="scroll-smooth" data-scroll-behavior="smooth">
-      <body className="antialiased bg-white dark:bg-[#0a0a0a] text-black dark:text-white transition-colors relative">
-        {/* Kirim fungsi buka AI ke Navbar */}
-        <Navbar onAiClick={() => setIsAiOpen(true)} />
-        
-        {children}
-
-        {/* Panggil komponen Chat, kirim state dan fungsi tutup */}
-        <FiloAssistant isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
+    <html lang="id" className={jakarta.variable} data-scroll-behavior="smooth" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
+      <body className="antialiased">
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

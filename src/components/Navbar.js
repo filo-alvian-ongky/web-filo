@@ -1,132 +1,202 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Sun, Moon, Menu, X, Bot, ChevronRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
+import { Sun, Moon, Sparkles, CircleHelp } from "lucide-react";
+import { navItems, profile } from "@/lib/data";
+import { LANGS, useLang } from "@/lib/i18n";
+import { useUI } from "./providers/UIProvider";
+import { iconBtn } from "./ui/styles";
+import { useSlidingPill } from "./ui/useSlidingPill";
 
-export default function Navbar({ onAiClick }) {
-  const [theme, setTheme] = useState("light");
-  const [mounted, setMounted] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+export const isActivePath = (pathname, path) => (path === "/" ? pathname === "/" : pathname?.startsWith(path));
+
+export function Logo({ compactUntilLg = false }) {
+  const { t } = useLang();
+  return (
+    <Link href="/" aria-label={`${profile.domain} — ${t.home}`} className="pressable inline-flex items-center gap-2.5 shrink-0">
+      <span className="grid place-items-center w-9 h-9 rounded-[12px] bg-accent text-white text-lg font-extrabold shadow-[0_6px_16px_-6px_rgba(10,108,245,0.8)]">
+        {profile.firstName[0]}
+      </span>
+      <span className={`text-[17px] font-bold tracking-tight text-fg ${compactUntilLg ? "hidden lg:inline" : ""}`}>
+        <span className="text-accent-fg">FiloAlvian</span>.com
+      </span>
+    </Link>
+  );
+}
+
+function ThemeToggle() {
+  const { theme, toggleTheme } = useUI();
+  const { t } = useLang();
+  const dark = theme === "dark";
+  return (
+    <button onClick={toggleTheme} className={iconBtn} aria-label={dark ? t.useLight : t.useDark} title={t.toggleTheme}>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.span
+          key={theme}
+          initial={{ rotate: 45, opacity: 0 }}
+          animate={{ rotate: 0, opacity: 1 }}
+          exit={{ rotate: -45, opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="grid place-items-center"
+        >
+          {dark ? <Sun size={20} strokeWidth={2.25} /> : <Moon size={20} strokeWidth={2.25} />}
+        </motion.span>
+      </AnimatePresence>
+    </button>
+  );
+}
+
+function HelpButton() {
+  const { openIntro } = useUI();
+  const { t } = useLang();
+  return (
+    <button onClick={openIntro} className={iconBtn} aria-label={t.openGuide} title={t.needGuide}>
+      <CircleHelp size={20} strokeWidth={2.25} />
+    </button>
+  );
+}
+
+// Ponsel: satu tombol bundar yang berganti ID ⇄ EN (hemat ruang di top bar)
+function LanguageButton() {
+  const { lang, setLang, t } = useLang();
+  const next = lang === "id" ? "en" : "id";
+  return (
+    <button
+      onClick={() => setLang(next)}
+      className={`${iconBtn} text-[13px] font-bold uppercase`}
+      aria-label={`${t.language}: ${lang === "id" ? "Bahasa Indonesia" : "English"}`}
+      title={t.language}
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.span key={lang} initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -8, opacity: 0 }} transition={{ duration: 0.18 }}>
+          {lang}
+        </motion.span>
+      </AnimatePresence>
+    </button>
+  );
+}
+
+// Desktop: pilihan bahasa ala segmented control iOS
+export function LanguageToggle() {
+  const { lang, setLang, t } = useLang();
+  const { register, style } = useSlidingPill(lang);
+  return (
+    <div role="radiogroup" aria-label={t.language} className="relative flex items-center p-0.5 rounded-full bg-surface-2 ring-1 ring-separator">
+      <motion.span aria-hidden style={style} className="absolute top-0 left-0 rounded-full bg-surface dark:bg-surface-3 shadow-[0_1px_3px_rgba(0,0,0,0.15)]" />
+      {LANGS.map((code) => (
+        <button
+          key={code}
+          ref={register(code)}
+          role="radio"
+          aria-checked={lang === code}
+          aria-label={code === "id" ? "Bahasa Indonesia" : "English"}
+          onClick={() => setLang(code)}
+          className={`relative h-8 min-w-9 px-2 rounded-full text-xs font-bold uppercase tracking-wide transition-colors ${
+            lang === code ? "text-fg" : "text-fg-3 hover:text-fg-2"
+          }`}
+        >
+          {code}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export default function Navbar() {
   const pathname = usePathname();
+  const { openAI, compactTitle } = useUI();
+  const { t, L } = useLang();
+  const { scrollY } = useScroll();
+  const [scrolled, setScrolled] = useState(false);
+  const activePath = navItems.find((item) => isActivePath(pathname, item.path))?.path;
+  const pill = useSlidingPill(activePath);
 
-  useEffect(() => {
-    setMounted(true);
-    const saved = localStorage.getItem("theme");
-    if (saved === "dark") {
-      setTheme("dark");
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  };
-
-  if (!mounted) return null;
-
-  const navItems = [
-    { name: "Home", path: "/" },
-    { name: "Experience", path: "/experience" },
-    { name: "Achievements", path: "/achievements" },
-    { name: "Projects", path: "/projects" },
-  ];
+  useMotionValueEvent(scrollY, "change", (y) => setScrolled(y > 8));
 
   return (
-    <nav className="fixed w-full z-50 top-0 bg-white/70 dark:bg-[#0a0a0a]/70 backdrop-blur-xl border-b border-gray-100 dark:border-white/5 transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-        
-        {/* Logo */}
-        <Link href="/" className="font-bold text-2xl tracking-tighter text-black dark:text-white relative z-[60] active:scale-95 transition-transform duration-200 inline-block">
-          <span className="text-blue-600">FiloAlvian</span>.com
-        </Link>
-
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center space-x-6">
-          <div className="flex space-x-8">
-            {navItems.map((item) => (
-              <Link key={item.name} href={item.path} className={`text-sm font-medium transition-all active:scale-95 inline-block ${pathname === item.path ? "text-blue-600" : "text-gray-500 hover:text-black dark:hover:text-white"}`}>
-                {item.name}
-              </Link>
-            ))}
+    <>
+      {/* Desktop: navbar kaca melayang */}
+      <header className="hidden md:block fixed inset-x-0 top-0 z-50 px-6 pt-4 pointer-events-none">
+        <nav
+          aria-label={t.mainNav}
+          className={`pointer-events-auto mx-auto max-w-6xl h-16 rounded-full glass pl-4 pr-2 flex items-center justify-between gap-3 transition-shadow duration-300 ${
+            scrolled ? "shadow-float" : "shadow-none"
+          }`}
+        >
+          <Logo compactUntilLg />
+          <ul className="relative flex items-center gap-1">
+            {/* Satu indikator yang bergeser ke samping mengikuti halaman aktif */}
+            <motion.span aria-hidden style={pill.style} className="absolute top-0 left-0 rounded-full bg-accent-soft" />
+            {navItems.map((item) => {
+              const active = item.path === activePath;
+              return (
+                <li key={item.path}>
+                  <Link
+                    ref={pill.register(item.path)}
+                    href={item.path}
+                    aria-current={active ? "page" : undefined}
+                    className={`relative inline-flex items-center h-10 px-4 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
+                      active ? "text-accent-fg" : "text-fg-2 hover:text-fg"
+                    }`}
+                  >
+                    {L(item.name)}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={openAI}
+              aria-label={t.askFiloAI}
+              className="pressable inline-flex items-center justify-center gap-2 h-10 w-10 lg:w-auto lg:px-4 mr-1 rounded-full bg-accent text-white text-sm font-semibold hover:brightness-110"
+            >
+              <Sparkles size={16} strokeWidth={2.5} /> <span className="hidden lg:inline whitespace-nowrap">{t.askAI}</span>
+            </button>
+            <LanguageToggle />
+            <HelpButton />
+            <ThemeToggle />
           </div>
+        </nav>
+      </header>
 
-          {/* Group Utilitas: Sama rata & Simetris */}
-          <div className="flex items-center space-x-3 border-l border-gray-100 dark:border-white/10 pl-6">
-            
-            {/* Tombol AI (Style disamakan dengan tombol tema) */}
-            <button 
-              onClick={onAiClick} 
-              className="p-2.5 bg-gray-100 dark:bg-white/5 rounded-2xl text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-all active:scale-90"
-              title="Tanya AI Assistant"
-            >
-              <Bot size={20} strokeWidth={2.5} />
-            </button>
-
-            {/* Tombol Tema */}
-            <button 
-              onClick={toggleTheme} 
-              className="p-2.5 bg-gray-100 dark:bg-white/5 rounded-2xl text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-all active:scale-90"
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div key={theme} initial={{ rotate: 45, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -45, opacity: 0 }} transition={{ duration: 0.2 }}>
-                  {theme === "light" ? <Moon size={20} strokeWidth={2.5} /> : <Sun size={20} strokeWidth={2.5} />}
-                </motion.div>
-              </AnimatePresence>
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Header (Tanpa Bot di Header untuk kebersihan) */}
-        <div className="flex md:hidden items-center space-x-3 relative z-[60]">
-          <button onClick={toggleTheme} className="p-2.5 bg-gray-100 dark:bg-white/5 rounded-2xl text-gray-700 dark:text-gray-300 active:scale-90">
-            {theme === "light" ? <Moon size={20} strokeWidth={2.5} /> : <Sun size={20} strokeWidth={2.5} />}
-          </button>
-          <button onClick={() => setIsOpen(!isOpen)} className="p-2.5 bg-blue-600 text-white rounded-2xl active:scale-90">
-            {isOpen ? <X size={20} strokeWidth={2.5} /> : <Menu size={20} strokeWidth={2.5} />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Menu Hamburger */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="absolute top-0 left-0 w-full h-screen bg-white dark:bg-[#0a0a0a] z-[50] flex flex-col items-center justify-center space-y-6 px-6">
-            {navItems.map((item) => (
-              <Link key={item.name} href={item.path} onClick={() => setIsOpen(false)} className={`text-3xl font-bold tracking-tighter transition-all active:scale-90 inline-block ${pathname === item.path ? "text-blue-600" : "text-gray-400"}`}>
-                {item.name}
-              </Link>
-            ))}
-
-            <div className="w-12 h-1 bg-gray-100 dark:bg-white/10 rounded-full my-2"></div>
-
-            {/* AI Assistant Button di Mobile */}
-            <button 
-              onClick={() => { setIsOpen(false); onAiClick(); }}
-              className="flex items-center gap-4 px-8 py-5 bg-blue-600/10 dark:bg-blue-600/20 rounded-[2.5rem] border border-blue-600/20 active:scale-95 transition-all w-full max-w-[300px] group"
-            >
-              <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-500/30">
-                <Bot size={24} strokeWidth={2.5} />
-              </div>
-              <div className="text-left">
-                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">AI Assistant</p>
-                <p className="text-xl font-bold text-black dark:text-white tracking-tighter italic">Tanya Filo AI</p>
-              </div>
-              <ChevronRight size={20} className="ml-auto text-blue-600 group-hover:translate-x-1 transition-transform" />
-            </button>
+      {/* Ponsel: top bar ala iOS — transparan di atas, kaca saat digulir */}
+      <header
+        className={`md:hidden fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-300 border-b ${
+          scrolled ? "bg-glass backdrop-blur-xl backdrop-saturate-150 border-separator" : "bg-transparent border-transparent"
+        }`}
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
+      >
+        <div className="relative h-14 pl-4 pr-2 flex items-center justify-between">
+          <motion.div animate={{ opacity: compactTitle ? 0 : 1, y: compactTitle ? -6 : 0 }} transition={{ duration: 0.2 }}>
+            <Logo />
           </motion.div>
-        )}
-      </AnimatePresence>
-    </nav>
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <AnimatePresence>
+              {compactTitle && (
+                <motion.p
+                  key={compactTitle}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  transition={{ duration: 0.2 }}
+                  className="text-[17px] font-semibold text-fg"
+                >
+                  {compactTitle}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+          <div className="relative flex items-center">
+            <LanguageButton />
+            <HelpButton />
+            <ThemeToggle />
+          </div>
+        </div>
+      </header>
+    </>
   );
 }

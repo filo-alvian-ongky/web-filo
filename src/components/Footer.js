@@ -1,61 +1,80 @@
 "use client";
 
-import { ExternalLink, Mail, Phone, Heart } from "lucide-react";
-import { FaGithub, FaLinkedin, FaInstagram } from 'react-icons/fa';
+import { motion } from "framer-motion";
+import { ArrowUpRight, ChevronRight, Heart, Mail, Phone, Sparkles } from "lucide-react";
+import { profile, socialLinks } from "@/lib/data";
+import { fadeUp, stagger, viewportOnce } from "@/lib/motion";
+import { useUI } from "./providers/UIProvider";
+import { useLang } from "@/lib/i18n";
+import { btn } from "./ui/styles";
 
-export default function Footer({ onOpenContact }) {
+function Row({ href, icon: Icon, tone, label, value, external }) {
   return (
-    <footer className="bg-gray-50 dark:bg-[#121212] pt-16 pb-8 border-t border-gray-200 dark:border-white/10 transition-colors">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-8 items-start">
-          <div>
-            <div className="text-sm font-semibold text-blue-600 uppercase tracking-wider mb-2">Mari bekerja sama</div>
-            <h2 className="text-3xl font-bold text-black dark:text-white mb-4">Punya proyek di pikiran?</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
-              Saya selalu terbuka untuk membahas proyek baru dan peluang. Ayo ciptakan sesuatu yang luar biasa bersama!
-            </p>
-            <button 
-              onClick={onOpenContact} 
-              className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors gap-2 shadow-lg shadow-blue-500/20"
-            >
-              Hubungi Saya <ExternalLink className="w-4 h-4" />
-            </button>
+    <a
+      href={href}
+      target={external ? "_blank" : undefined}
+      rel={external ? "noopener noreferrer" : undefined}
+      className="group flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-surface-2 active:bg-surface-3"
+    >
+      <span className="grid place-items-center w-9 h-9 rounded-[11px] text-white shrink-0" style={{ background: tone }}>
+        <Icon size={18} />
+      </span>
+      <span className="flex-1 min-w-0">
+        <span className="block text-[15px] font-semibold text-fg">{label}</span>
+        {value && <span className="block text-sm text-fg-2 truncate">{value}</span>}
+      </span>
+      {external ? (
+        <ArrowUpRight size={18} className="text-fg-3 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+      ) : (
+        <ChevronRight size={18} className="text-fg-3 transition-transform group-hover:translate-x-0.5" />
+      )}
+    </a>
+  );
+}
+
+export default function Footer() {
+  const { openContact, openAI } = useUI();
+  const { t } = useLang();
+  const year = new Date().getFullYear();
+  const tones = { GitHub: "#3d444d", LinkedIn: "#0a66c2", Instagram: "#e1306c" };
+
+  return (
+    <footer className="px-4 md:px-6 pt-10 pb-32 md:pb-10">
+      <motion.div variants={stagger(0.12)} initial="hidden" whileInView="visible" viewport={viewportOnce} className="mx-auto max-w-6xl">
+        <motion.div variants={fadeUp} className="card relative overflow-hidden p-6 md:p-12 grid gap-10 md:grid-cols-2 md:items-center">
+          <div aria-hidden className="pointer-events-none absolute -top-24 -left-24 w-72 h-72 rounded-full bg-accent/15 blur-3xl" />
+          <div className="relative">
+            <p className="text-sm font-semibold text-accent-fg mb-2">{t.letsWork}</p>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-fg">{t.projectInMind}</h2>
+            <p className="mt-3 text-fg-2 leading-relaxed max-w-md">{t.footerText}</p>
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <button onClick={openContact} className={btn.primary}>
+                {t.contactMe} <ArrowUpRight size={18} strokeWidth={2.5} />
+              </button>
+              <button onClick={openAI} className={btn.tonal}>
+                <Sparkles size={18} strokeWidth={2.25} /> {t.askFiloAI}
+              </button>
+            </div>
           </div>
 
-          <div className="md:text-right flex flex-col md:items-end justify-center h-full">
-            <div className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Media Sosial</div>
-            
-            {/* Social Buttons */}
-            <div className="flex items-center gap-4 mb-6 md:justify-end">
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub" className="w-10 h-10 rounded-full bg-gray-200 dark:bg-white/5 border border-gray-300 dark:border-white/10 flex items-center justify-center text-black dark:text-white hover:bg-blue-600 hover:text-white transition-colors">
-                <FaGithub className="w-5 h-5" />
-              </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="w-10 h-10 rounded-full bg-gray-200 dark:bg-white/5 border border-gray-300 dark:border-white/10 flex items-center justify-center text-black dark:text-white hover:bg-blue-600 hover:text-white transition-colors">
-                <FaLinkedin className="w-5 h-5" />
-              </a>
-              <a href="https://instagram.com/filoalvianongky" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="w-10 h-10 rounded-full bg-gray-200 dark:bg-white/5 border border-gray-300 dark:border-white/10 flex items-center justify-center text-black dark:text-white hover:bg-pink-600 hover:text-white transition-colors">
-                <FaInstagram className="w-5 h-5" />
-              </a>
-            </div>
-
-            <div className="flex flex-col gap-2 text-gray-600 dark:text-gray-400 md:items-end">
-              <a href="mailto:filoalvianongky@gmail.com" className="hover:text-black dark:hover:text-white transition-colors flex items-center gap-2">
-                <Mail className="w-4 h-4 text-blue-600" /> filoalvianongky@gmail.com
-              </a>
-              <a href="tel:+6282140464565" className="hover:text-black dark:hover:text-white transition-colors flex items-center gap-2">
-                <Phone className="w-4 h-4 text-blue-600" /> +62 (821) 4046-4565
-              </a>
-            </div>
+          <div className="relative rounded-[1.4rem] bg-bg/60 dark:bg-surface-2/60 ring-1 ring-separator overflow-hidden divide-y divide-separator">
+            <Row href={`mailto:${profile.email}`} icon={Mail} tone="#0a6cf5" label="Email" value={profile.email} />
+            <Row href={profile.phoneHref} icon={Phone} tone="#12a150" label={t.phone} value={profile.phone} />
+            {socialLinks.map((s) => (
+              <Row key={s.name} href={s.href} icon={s.icon} tone={tones[s.name]} label={s.name} external />
+            ))}
           </div>
-        </div>
+        </motion.div>
 
-        <div className="mt-16 pt-8 border-t border-gray-200 dark:border-white/10 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
-          <p>© 2026 Filo Developer. All rights reserved.</p>
-          <p className="mt-2 md:mt-0 flex items-center gap-1">
-            Made with <Heart className="w-4 h-4 text-red-500 fill-red-500" /> by Filo
+        <motion.div variants={fadeUp} className="mt-6 px-2 flex flex-col md:flex-row items-center justify-between gap-2 text-sm text-fg-3">
+          <p>
+            © {year} {profile.name}. {t.rights}
           </p>
-        </div>
-      </div>
+          <p className="flex items-center gap-1">
+            {t.madeWith} <Heart size={14} className="text-red-500 fill-red-500" /> {t.by} {profile.firstName}
+          </p>
+        </motion.div>
+      </motion.div>
     </footer>
   );
 }

@@ -14,6 +14,8 @@ export async function POST(req) {
     }
     
     const lastMessage = messages[messages.length - 1].content;
+    // Bahasa yang sedang dipilih pengunjung di website ("id" atau "en")
+    const lang = body.lang === "en" ? "en" : "id";
 
     // TAHAP 1: MINTA DAFTAR MODEL RESMI DARI GOOGLE
     const checkModelsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
@@ -63,6 +65,9 @@ export async function POST(req) {
     - Untuk membuat daftar, WAJIB gunakan ANGKA (1., 2., 3.) atau STRIP (-). 
     - Untuk penekanan, gunakan HURUF KAPITAL.
     - SAPAAN SINGKAT: Jika user HANYA MENYAPA ("tes", "halo", "p"), balas MAKSIMAL 2 KALIMAT ramah menawarkan bantuan terkait portofolio Filo.
+
+    [ATURAN BAHASA]
+    - Pengunjung sedang memakai website dalam ${lang === "en" ? "BAHASA INGGRIS. Jawab dalam bahasa Inggris" : "BAHASA INDONESIA. Jawab dalam bahasa Indonesia"}, kecuali user jelas menulis dalam bahasa lain — ikuti bahasa yang dipakai user.
     `;
 
     // TAHAP 3: EKSEKUSI KE MODEL YANG DITEMUKAN

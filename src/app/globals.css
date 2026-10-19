@@ -2,16 +2,153 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Samsung Style: Smooth Scrolling & Selection */
-html {
-  scroll-behavior: smooth;
+/* ==========================================================================
+   Design tokens — Samsung One UI (visual) + iOS (interaction)
+   ========================================================================== */
+
+:root {
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --surface-2: #eef0f3;
+  --surface-3: #e4e7ec;
+  --fg: #0b0b0d;
+  --fg-2: #4b5059;
+  --fg-3: #8a8f98;
+  --separator: rgba(15, 23, 42, 0.08);
+  --glass: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --accent: #0a6cf5;
+  --accent-fg: #0a64e0;
+  --accent-soft: rgba(10, 108, 245, 0.1);
+  --success: #12a150;
+  --elev-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.12);
+  --elev-float: 0 10px 40px -12px rgba(15, 23, 42, 0.25), 0 2px 6px rgba(15, 23, 42, 0.06);
+  color-scheme: light;
 }
 
-::selection {
-  background-color: #0074e4; /* Samsung Blue */
-  color: white;
+.dark {
+  --bg: #000000;
+  --surface: #161618;
+  --surface-2: #222226;
+  --surface-3: #2c2c31;
+  --fg: #f5f5f7;
+  --fg-2: #b2b4bb;
+  --fg-3: #7c7f87;
+  --separator: rgba(255, 255, 255, 0.08);
+  --glass: rgba(28, 28, 32, 0.68);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --accent: #0a6cf5;
+  --accent-fg: #5aa2ff;
+  --accent-soft: rgba(90, 162, 255, 0.14);
+  --success: #30d158;
+  --elev-card: 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --elev-float: 0 10px 40px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-separator: var(--separator);
+  --color-glass: var(--glass);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --shadow-card: var(--elev-card);
+  --shadow-float: var(--elev-float);
+}
+
+@theme static {
+  --radius-card: 1.75rem;
+  --radius-tile: 1.25rem;
+  --ease-ios: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+::selection {
+  background-color: var(--accent);
+  color: white;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-fg);
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+/* Material kaca ala iOS — dipakai navbar, tab bar & panel melayang */
+@utility glass {
+  background-color: var(--glass);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  backdrop-filter: saturate(180%) blur(22px);
+  border: 1px solid var(--glass-border);
+}
+
+/* Kartu One UI */
+@utility card {
+  background-color: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--elev-card);
+}
+
+/* Umpan balik sentuh iOS: menyusut sedikit saat ditekan */
+@utility pressable {
+  transition: transform 0.25s var(--ease-ios), background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Kursor typewriter mengikuti warna aksen */
+.Typewriter__cursor {
+  color: var(--accent-fg);
+  font-weight: 300;
 }

@@ -1,71 +1,86 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Layout, Menu, Moon, Bot } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Sparkles, LayoutGrid, Moon, Hand, PanelTop, Languages } from "lucide-react";
+import { spring } from "@/lib/motion";
+import { useEscape, useScrollLock } from "@/lib/hooks";
+import { useUI } from "../providers/UIProvider";
+import { btn } from "../ui/styles";
+import { useLang } from "@/lib/i18n";
 
-export default function IntroModal({ isOpen, onClose }) {
+// Teks diambil dari kamus i18n berdasarkan kunci
+const ITEMS = [
+  { icon: PanelTop, tone: "#0a6cf5", title: "guideNav", desktop: "guideNavDesktop", mobile: "guideNavMobile" },
+  { icon: Hand, tone: "#f97316", title: "guideBadge", body: "guideBadgeBody" },
+  { icon: Sparkles, tone: "#8b5cf6", title: "guideAI", body: "guideAIBody" },
+  { icon: Languages, tone: "#12a150", title: "guideLang", body: "guideLangBody" },
+  { icon: Moon, tone: "#4f46e5", title: "guideTheme", body: "guideThemeBody" },
+];
+
+// Panduan website — tetap memakai animasi "genie" bawaan,
+// kini berasal dari tombol bantuan (?) di pojok kanan atas.
+export default function IntroModal() {
+  const { introOpen, closeIntro } = useUI();
+  const { t } = useLang();
+  useScrollLock(introOpen);
+  useEscape(introOpen, closeIntro);
+
   return (
     <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[120]" 
+      {introOpen && (
+        <div key="intro" className="fixed inset-0 z-[210]">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={closeIntro}
           />
-          <div className="fixed inset-0 flex items-center justify-center z-[121] p-6 pointer-events-none perspective-[1000px]">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.1, x: "42vw", y: "42vh", skewY: -30, borderRadius: "100%" }} 
-              animate={{ opacity: 1, scale: 1, x: 0, y: 0, skewY: 0, borderRadius: "2.5rem" }} 
-              exit={{ opacity: 0, scale: 0, x: "42vw", y: "42vh", skewY: -30, borderRadius: "100%" }} 
-              transition={{ type: "spring", stiffness: 180, damping: 25, mass: 0.8 }}
-              className="bg-white dark:bg-[#121212] w-full max-w-lg shadow-[0_30px_70px_rgba(0,0,0,0.4)] border border-gray-100 dark:border-white/10 p-8 text-left relative overflow-hidden pointer-events-auto origin-bottom-right"
+          <div className="absolute inset-0 flex items-center justify-center p-5 pointer-events-none">
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="intro-title"
+              initial={{ opacity: 0, scale: 0.1, x: "40vw", y: "-42vh", skewY: 30, borderRadius: "100%" }}
+              animate={{ opacity: 1, scale: 1, x: 0, y: 0, skewY: 0, borderRadius: "2rem" }}
+              exit={{ opacity: 0, scale: 0, x: "40vw", y: "-42vh", skewY: 30, borderRadius: "100%" }}
+              transition={spring.genie}
+              className="pointer-events-auto relative w-full max-w-lg overflow-hidden bg-surface shadow-float p-6 md:p-8 origin-top-right"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-bl-full -z-10 blur-2xl"></div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-blue-50 dark:bg-blue-600/20 text-blue-600 rounded-2xl"><Sparkles size={24} /></div>
-                <h2 className="text-2xl font-bold tracking-tighter text-black dark:text-white">Panduan Website</h2>
-              </div>
-              <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">Selamat datang! Agar pengalaman menjelajah Anda lebih nyaman, berikut adalah fungsi menu di bagian atas layar:</p>
-              
-              {/* DESKTOP LAYOUT (TANPA HAMBURGER MENU) */}
-              <div className="hidden md:block space-y-4 mb-8">
-                {/* Baris Navigasi */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-default"><p className="font-bold text-black dark:text-white flex items-center gap-2 mb-1"><Layout size={16} className="text-blue-500"/> Home</p><p className="text-xs text-gray-500 dark:text-gray-400">Kembali ke beranda utama ini.</p></div>
-                  <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-default"><p className="font-bold text-black dark:text-white flex items-center gap-2 mb-1"><Layout size={16} className="text-blue-500"/> Experience</p><p className="text-xs text-gray-500 dark:text-gray-400">Melihat riwayat perjalanan.</p></div>
-                  <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-default"><p className="font-bold text-black dark:text-white flex items-center gap-2 mb-1"><Layout size={16} className="text-blue-500"/> Achievements</p><p className="text-xs text-gray-500 dark:text-gray-400">Kumpulan penghargaan saya.</p></div>
-                  <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-default"><p className="font-bold text-black dark:text-white flex items-center gap-2 mb-1"><Layout size={16} className="text-blue-500"/> Projects</p><p className="text-xs text-gray-500 dark:text-gray-400">Melihat detail portofolio.</p></div>
+              <div aria-hidden className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-accent/15 blur-3xl" />
+              <div className="relative">
+                <div className="grid place-items-center w-14 h-14 rounded-[18px] bg-accent text-white mb-5 shadow-[0_10px_24px_-10px_rgba(10,108,245,0.8)]">
+                  <LayoutGrid size={26} />
                 </div>
-                
-                {/* Baris Utilitas: AI & Tema */}
-                <div className="grid grid-cols-2 gap-4 mt-4">
-                  <div className="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/30 flex items-start gap-3 cursor-default">
-                    <Bot size={20} className="text-indigo-600 mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-bold text-black dark:text-white text-sm">AI Assistant</p>
-                      <p className="text-[11px] text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">Tanya AI seputar karir & portofolio saya.</p>
-                    </div>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 flex items-start gap-3 cursor-default">
-                    <Moon size={20} className="text-blue-600 mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-bold text-black dark:text-white text-sm">Tombol Tema</p>
-                      <p className="text-[11px] text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">Ubah warna website menjadi Terang/Gelap.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                <h2 id="intro-title" className="text-2xl md:text-3xl font-extrabold tracking-tight text-fg">
+                  {t.welcome}
+                </h2>
+                <p className="mt-2 text-fg-2 leading-relaxed">{t.welcomeSub}</p>
 
-              {/* MOBILE LAYOUT (DENGAN HAMBURGER MENU) */}
-              <div className="block md:hidden space-y-4 mb-8">
-                <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-start gap-3"><Menu size={24} className="text-blue-600 mt-1 shrink-0" /><div><p className="font-bold text-black dark:text-white">Menu Hamburger (☰)</p><p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Ketuk ikon garis tiga di pojok atas untuk membuka daftar halaman.</p></div></div>
-                <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 flex items-start gap-3"><Moon size={24} className="text-blue-600 mt-1 shrink-0" /><div><p className="font-bold text-black dark:text-white">Tombol Tema</p><p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Ketuk ikon untuk mengubah tampilan layar Terang atau Gelap.</p></div></div>
-              </div>
+                <ul className="mt-6 space-y-4">
+                  {ITEMS.map((item) => (
+                    <li key={item.title} className="flex items-start gap-4">
+                      <span className="grid place-items-center w-10 h-10 rounded-[12px] text-white shrink-0" style={{ background: item.tone }}>
+                        <item.icon size={20} />
+                      </span>
+                      <div>
+                        <p className="font-semibold text-fg">{t[item.title]}</p>
+                        {item.body && <p className="text-sm text-fg-2 leading-relaxed">{t[item.body]}</p>}
+                        {item.desktop && <p className="hidden md:block text-sm text-fg-2 leading-relaxed">{t[item.desktop]}</p>}
+                        {item.mobile && <p className="md:hidden text-sm text-fg-2 leading-relaxed">{t[item.mobile]}</p>}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
 
-              <button onClick={onClose} className="w-full bg-black dark:bg-white text-white dark:text-black py-4 rounded-2xl font-bold text-lg hover:scale-[1.02] active:scale-95 transition-all shadow-lg">Paham, Mulai Jelajahi!</button>
+                <button onClick={closeIntro} className={`${btn.primary} w-full mt-8 h-14 text-base`}>
+                  {t.guideCta}
+                </button>
+              </div>
             </motion.div>
           </div>
-        </>
+        </div>
       )}
     </AnimatePresence>
   );
