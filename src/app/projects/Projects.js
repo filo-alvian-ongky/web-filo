@@ -4,9 +4,11 @@ import { useCallback, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Apple, BarChart3, Cpu, Play, X } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
+import Reveal from "../../components/ui/Reveal";
+import Tilt from "../../components/ui/Tilt";
 import { chip } from "../../components/ui/styles";
 import { projects } from "@/lib/data";
-import { fadeUp, spring, stagger } from "@/lib/motion";
+import { spring } from "@/lib/motion";
 import { useEscape, useScrollLock } from "@/lib/hooks";
 import { useLang } from "@/lib/i18n";
 
@@ -34,10 +36,13 @@ export default function Projects() {
       <PageHeader eyebrow={t.projEyebrow} title={t.projTitle} description={t.projDesc} />
 
       <section className="px-4 md:px-6">
-        <motion.div variants={stagger(0.15, 0.2)} initial="hidden" animate="visible" className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {projects.map((p) => (
-            <motion.div key={p.id} variants={fadeUp}>
-              <motion.button
+            // Tilt hover ada di tombol; langsung datar saat ditekan agar animasi kartu → viewer tetap presisi
+            <Reveal key={p.id} tilt={false}>
+              <Tilt
+                as="button"
+                resetOnPress
                 layoutId={`project-${p.id}`}
                 onClick={() => setSelectedId(p.id)}
                 whileHover={{ y: -4 }}
@@ -67,10 +72,10 @@ export default function Projects() {
                     ))}
                   </div>
                 </div>
-              </motion.button>
-            </motion.div>
+              </Tilt>
+            </Reveal>
           ))}
-        </motion.div>
+        </div>
       </section>
 
       {/* Viewer presentasi — kartu "mengembang" ala App Store iOS (shared layout bawaan) */}

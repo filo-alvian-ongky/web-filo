@@ -6,10 +6,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUpRight, Calendar, ChevronRight, FileText } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
 import SegmentedControl from "../../components/ui/SegmentedControl";
+import Reveal from "../../components/ui/Reveal";
 import Sheet from "../../components/ui/Sheet";
 import { btn, chip } from "../../components/ui/styles";
 import { achievementFilters, achievements, categoryLabel } from "@/lib/data";
-import { spring } from "@/lib/motion";
+import { EASE_IOS, spring } from "@/lib/motion";
 import { useLang } from "@/lib/i18n";
 
 export default function Achievements() {
@@ -43,42 +44,51 @@ export default function Achievements() {
       <section className="px-4 md:px-6">
         <motion.div layout className="mx-auto max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
           <AnimatePresence mode="popLayout" initial={false}>
-            {list.map((a, i) => (
-              <motion.button
-                layout
-                key={a.image}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0, transition: { duration: 0.5, delay: Math.min(i, 6) * 0.06 } }}
-                exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.2 } }}
-                whileHover={{ y: -4 }}
-                whileTap={{ scale: 0.98 }}
-                transition={spring.press}
-                onClick={() => openDetail(a)}
-                className="card group text-left overflow-hidden"
-              >
-                <div className="relative aspect-[1.414] bg-surface-2 overflow-hidden">
-                  <Image
-                    src={a.thumb}
-                    alt={`${t.certificate} ${L(a.title)}`}
-                    fill
-                    sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                  />
-                  <span className="absolute top-3 left-3 inline-flex items-center h-7 px-2.5 rounded-full glass text-[11px] font-bold text-fg">{L(categoryLabel[a.category])}</span>
-                </div>
-                <div className="p-5">
-                  <h2 className="text-lg font-bold text-fg leading-snug">{L(a.title)}</h2>
-                  <p className="mt-1 text-sm text-fg-2">{a.provider}</p>
-                  <div className="mt-4 flex items-center justify-between gap-3 text-sm">
-                    <span className="inline-flex items-center gap-1.5 text-fg-3">
-                      <Calendar size={14} /> {date(a.date)}
-                    </span>
-                    <span className="inline-flex items-center gap-0.5 font-semibold text-accent-fg">
-                      {t.detail} <ChevronRight size={16} className="transition-transform group-hover:translate-x-0.5" />
-                    </span>
-                  </div>
-                </div>
-              </motion.button>
+            {list.map((a) => (
+              // Lapisan luar: animasi filter (layout & keluar). Tengah: animasi scroll ala Jitter. Dalam: hover/tap.
+              <motion.div layout key={a.image} exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.2 } }} transition={spring.sheet}>
+                <Reveal className="h-full">
+                  <motion.button
+                    whileHover={{ y: -4 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={spring.press}
+                    onClick={() => openDetail(a)}
+                    className="card group w-full h-full text-left overflow-hidden"
+                  >
+                    <div className="relative aspect-[1.414] bg-surface-2 overflow-hidden">
+                      {/* Gambar "mendarat": sedikit diperbesar lalu kembali normal saat kartu muncul */}
+                      <motion.div
+                        className="absolute inset-0"
+                        initial={{ scale: 1.14 }}
+                        whileInView={{ scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.1, ease: EASE_IOS }}
+                      >
+                        <Image
+                          src={a.thumb}
+                          alt={`${t.certificate} ${L(a.title)}`}
+                          fill
+                          sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
+                          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                        />
+                      </motion.div>
+                      <span className="absolute top-3 left-3 inline-flex items-center h-7 px-2.5 rounded-full glass text-[11px] font-bold text-fg">{L(categoryLabel[a.category])}</span>
+                    </div>
+                    <div className="p-5">
+                      <h2 className="text-lg font-bold text-fg leading-snug">{L(a.title)}</h2>
+                      <p className="mt-1 text-sm text-fg-2">{a.provider}</p>
+                      <div className="mt-4 flex items-center justify-between gap-3 text-sm">
+                        <span className="inline-flex items-center gap-1.5 text-fg-3">
+                          <Calendar size={14} /> {date(a.date)}
+                        </span>
+                        <span className="inline-flex items-center gap-0.5 font-semibold text-accent-fg">
+                          {t.detail} <ChevronRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+                        </span>
+                      </div>
+                    </div>
+                  </motion.button>
+                </Reveal>
+              </motion.div>
             ))}
           </AnimatePresence>
         </motion.div>

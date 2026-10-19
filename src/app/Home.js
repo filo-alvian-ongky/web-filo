@@ -13,7 +13,7 @@ import SectionHeader from "../components/ui/SectionHeader";
 import { useUI } from "../components/providers/UIProvider";
 import { btn } from "../components/ui/styles";
 import { achievements, focusAreas, highlights, profile, techStack } from "@/lib/data";
-import { fadeUp, stagger, viewportOnce } from "@/lib/motion";
+import { fadeUp, popIn, slideIn, stagger, viewportOnce } from "@/lib/motion";
 import { tr, useLang } from "@/lib/i18n";
 
 export default function Home() {
@@ -108,13 +108,7 @@ export default function Home() {
 
       {/* Sorotan — gaya widget One UI */}
       <section className="px-4 md:px-6">
-        <motion.div
-          variants={stagger(0.08)}
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewportOnce}
-          className="mx-auto max-w-6xl grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"
-        >
+        <div className="mx-auto max-w-6xl grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           {highlights.map((h) => (
             <Card key={h.tone} className="p-5 md:p-6">
               <p className="text-2xl md:text-3xl font-extrabold tracking-tight" style={{ color: h.tone }}>
@@ -123,20 +117,14 @@ export default function Home() {
               <p className="mt-1 text-sm text-fg-2 leading-snug">{L(h.label)}</p>
             </Card>
           ))}
-        </motion.div>
+        </div>
       </section>
 
       {/* Eksplorasi */}
       <section className="px-4 md:px-6 mt-14 md:mt-20">
         <div className="mx-auto max-w-6xl">
           <SectionHeader title={t.explore} />
-          <motion.div
-            variants={stagger(0.12)}
-            initial="hidden"
-            whileInView="visible"
-            viewport={viewportOnce}
-            className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4"
-          >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
             {focusAreas.map((f) => {
               const Icon = f.icon;
               return (
@@ -149,37 +137,32 @@ export default function Home() {
                 </Card>
               );
             })}
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Teknologi & pencapaian terbaru */}
       <section className="px-4 md:px-6 mt-14 md:mt-20">
-        <motion.div
-          variants={stagger(0.12)}
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewportOnce}
-          className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-4"
-        >
+        <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-4">
           <Card className="md:col-span-2 p-6 md:p-7">
             <h2 className="text-lg font-bold text-fg">{t.techTitle}</h2>
             <p className="mt-1 text-sm text-fg-2">{t.techSub}</p>
-            <div className="mt-5 flex flex-wrap gap-2">
+            <motion.div variants={stagger(0.05, 0.25)} initial="hidden" whileInView="visible" viewport={viewportOnce} className="mt-5 flex flex-wrap gap-2">
               {techStack.map((tech) => {
                 const Icon = tech.icon;
                 return (
-                  <span
+                  <motion.span
                     key={tech.name}
+                    variants={popIn}
                     style={{ "--tone": tech.color }}
                     className="group inline-flex items-center gap-2 h-10 pl-3 pr-3.5 rounded-full bg-surface-2 ring-1 ring-transparent text-sm font-semibold text-fg-2 transition-colors duration-300 hover:text-fg hover:ring-[var(--tone)] hover:bg-[color-mix(in_srgb,var(--tone)_10%,transparent)]"
                   >
                     <Icon className="w-[18px] h-[18px] text-fg-3 transition-colors duration-300 group-hover:text-[var(--tone)]" />
                     {tech.name}
-                  </span>
+                  </motion.span>
                 );
               })}
-            </div>
+            </motion.div>
           </Card>
 
           <Card className="md:col-span-3 p-2 md:p-3">
@@ -189,9 +172,9 @@ export default function Home() {
                 {t.seeAll} <ChevronRight size={16} strokeWidth={2.5} />
               </Link>
             </div>
-            <ul>
+            <motion.ul variants={stagger(0.08, 0.25)} initial="hidden" whileInView="visible" viewport={viewportOnce}>
               {achievements.slice(0, 4).map((a) => (
-                <li key={a.image}>
+                <motion.li key={a.image} variants={slideIn}>
                   <Link href="/achievements" className="group flex items-center gap-4 px-4 py-3 rounded-[1.1rem] transition-colors hover:bg-surface-2 active:bg-surface-3">
                     <span className="relative w-16 h-11 rounded-[10px] overflow-hidden bg-surface-2 shrink-0 ring-1 ring-separator">
                       <Image src={a.thumb} alt="" fill sizes="64px" className="object-cover" />
@@ -204,11 +187,11 @@ export default function Home() {
                     </span>
                     <ChevronRight size={18} className="text-fg-3 transition-transform group-hover:translate-x-0.5" />
                   </Link>
-                </li>
+                </motion.li>
               ))}
-            </ul>
+            </motion.ul>
           </Card>
-        </motion.div>
+        </div>
       </section>
 
       <Sheet open={photoOpen} onClose={() => setPhotoOpen(false)} title={profile.name} subtitle={`${role} · ${profile.campus}`} size="sm">

@@ -1,7 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, LayoutGrid, Moon, Hand, PanelTop, Languages } from "lucide-react";
+import { Sparkles, Moon, Hand, PanelTop, Languages } from "lucide-react";
+import BrandLogo from "../ui/BrandLogo";
 import { spring } from "@/lib/motion";
 import { useEscape, useScrollLock } from "@/lib/hooks";
 import { useUI } from "../providers/UIProvider";
@@ -56,9 +57,7 @@ export default function IntroModal() {
 
               {/* Isi bisa digulir bila layar pendek atau ukuran huruf perangkat diperbesar */}
               <div className="relative flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 pt-5 pb-2 md:px-8 md:pt-8">
-                <div className="grid place-items-center w-11 h-11 md:w-14 md:h-14 rounded-[14px] md:rounded-[18px] bg-accent text-white mb-4 md:mb-5 shadow-[0_10px_24px_-10px_rgba(10,108,245,0.8)]">
-                  <LayoutGrid className="w-[22px] h-[22px] md:w-[26px] md:h-[26px]" />
-                </div>
+                <BrandLogo title="Logo FiloAlvian.com" className="w-12 h-12 md:w-14 md:h-14 text-fg mb-4 md:mb-5" />
                 <h2 id="intro-title" className="text-[1.375rem] md:text-3xl leading-tight font-extrabold tracking-tight text-fg">
                   {t.welcome}
                 </h2>

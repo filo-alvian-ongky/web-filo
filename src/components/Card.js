@@ -1,14 +1,15 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { fadeUp, spring } from "@/lib/motion";
+import Reveal from "./ui/Reveal";
+import { spring } from "@/lib/motion";
 
-// Kartu One UI. Tetap memakai animasi bawaan (fade-up + spring 400/25),
-// namun efek hover dibuat lebih halus: hanya terangkat, tanpa membesar.
-export default function Card({ children, className = "", interactive = false, ...props }) {
+// Kartu One UI. Muncul dengan animasi scroll ala Jitter (lihat Reveal),
+// hover/tap tetap memakai spring bawaan 400/25: terangkat halus, tanpa membesar.
+export default function Card({ children, className = "", interactive = false, tilt = true, delay = 0, ...props }) {
   return (
-    <motion.div
-      variants={fadeUp}
+    <Reveal
+      delay={delay}
+      tilt={tilt}
       whileHover={interactive ? { y: -4 } : undefined}
       whileTap={interactive ? { scale: 0.98 } : undefined}
       transition={spring.press}
@@ -16,6 +17,6 @@ export default function Card({ children, className = "", interactive = false, ..
       {...props}
     >
       {children}
-    </motion.div>
+    </Reveal>
   );
 }

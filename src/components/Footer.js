@@ -1,16 +1,18 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowUpRight, ChevronRight, Heart, Mail, Phone, Sparkles } from "lucide-react";
+import { ArrowUpRight, ChevronRight, Mail, Phone, Sparkles } from "lucide-react";
 import { profile, socialLinks } from "@/lib/data";
-import { fadeUp, stagger, viewportOnce } from "@/lib/motion";
+import Reveal from "./ui/Reveal";
+import { slideIn, stagger, viewportOnce } from "@/lib/motion";
 import { useUI } from "./providers/UIProvider";
 import { useLang } from "@/lib/i18n";
 import { btn } from "./ui/styles";
 
 function Row({ href, icon: Icon, tone, label, value, external }) {
   return (
-    <a
+    <motion.a
+      variants={slideIn}
       href={href}
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
@@ -28,7 +30,7 @@ function Row({ href, icon: Icon, tone, label, value, external }) {
       ) : (
         <ChevronRight size={18} className="text-fg-3 transition-transform group-hover:translate-x-0.5" />
       )}
-    </a>
+    </motion.a>
   );
 }
 
@@ -40,8 +42,8 @@ export default function Footer() {
 
   return (
     <footer className="px-4 md:px-6 pt-10 pb-32 md:pb-10">
-      <motion.div variants={stagger(0.12)} initial="hidden" whileInView="visible" viewport={viewportOnce} className="mx-auto max-w-6xl">
-        <motion.div variants={fadeUp} className="card relative overflow-hidden p-6 md:p-12 grid grid-cols-1 gap-10 md:grid-cols-2 md:items-center">
+      <div className="mx-auto max-w-6xl">
+        <Reveal className="card relative overflow-hidden p-6 md:p-12 grid grid-cols-1 gap-10 md:grid-cols-2 md:items-center">
           <div aria-hidden className="pointer-events-none absolute -top-24 -left-24 w-72 h-72 rounded-full bg-accent/15 blur-3xl" />
           <div className="relative">
             <p className="text-sm font-semibold text-accent-fg mb-2">{t.letsWork}</p>
@@ -57,24 +59,27 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="relative rounded-[1.4rem] bg-bg/60 dark:bg-surface-2/60 ring-1 ring-separator overflow-hidden divide-y divide-separator">
+          <motion.div
+            variants={stagger(0.07, 0.3)}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            className="relative rounded-[1.4rem] bg-bg/60 dark:bg-surface-2/60 ring-1 ring-separator overflow-hidden divide-y divide-separator"
+          >
             <Row href={`mailto:${profile.email}`} icon={Mail} tone="#0a6cf5" label="Email" value={profile.email} />
             <Row href={profile.phoneHref} icon={Phone} tone="#12a150" label={t.phone} value={profile.phone} />
             {socialLinks.map((s) => (
               <Row key={s.name} href={s.href} icon={s.icon} tone={tones[s.name]} label={s.name} external />
             ))}
-          </div>
-        </motion.div>
+          </motion.div>
+        </Reveal>
 
-        <motion.div variants={fadeUp} className="mt-6 px-2 flex flex-col md:flex-row items-center justify-between gap-2 text-sm text-fg-3">
+        <Reveal tilt={false} delay={0.15} className="mt-6 px-2 text-center text-sm text-fg-3">
           <p>
             © {year} {profile.name}. {t.rights}
           </p>
-          <p className="flex items-center gap-1">
-            {t.madeWith} <Heart size={14} className="text-red-500 fill-red-500" /> {t.by} {profile.firstName}
-          </p>
-        </motion.div>
-      </motion.div>
+        </Reveal>
+      </div>
     </footer>
   );
 }

@@ -3,7 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import { motion } from "framer-motion";
+import { RotateCw } from "lucide-react";
 import { useUI } from "../providers/UIProvider";
+import { useLang } from "@/lib/i18n";
+import { spring } from "@/lib/motion";
 
 // Three.js hanya dimuat di browser & hanya di halaman yang memakai lanyard
 const LanyardScene = dynamic(() => import("./LanyardScene"), { ssr: false });
@@ -31,8 +35,10 @@ function StaticBadge({ profile }) {
 export default function Lanyard({ profile, onTap, eventSource, anchorRef, className = "" }) {
   const ref = useRef(null);
   const { theme } = useUI();
+  const { t } = useLang();
   const [active, setActive] = useState(true);
   const [anchor, setAnchor] = useState(0.5);
+  const [flipped, setFlipped] = useState(false);
 
   // Hentikan render & fisika saat lanyard tidak terlihat (hemat baterai)
   useEffect(() => {
@@ -66,10 +72,31 @@ export default function Lanyard({ profile, onTap, eventSource, anchorRef, classN
         dark={theme === "dark"}
         active={active}
         anchor={anchor}
+        flipped={flipped}
         eventSource={eventSource}
         onTap={onTap}
         fallback={<StaticBadge profile={profile} />}
       />
+
+      {/* Tombol balik kartu — diletakkan tepat di bawah kartu yang tergantung */}
+      <motion.button
+        type="button"
+        onClick={() => setFlipped((f) => !f)}
+        // Jangan sampai klik tombol ikut dianggap "menarik kartu" oleh kanvas 3D
+        onPointerDown={(e) => e.stopPropagation()}
+        aria-pressed={flipped}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.2, duration: 0.5 }}
+        whileTap={{ scale: 0.94 }}
+        style={{ left: `${anchor * 100}%` }}
+        className="pointer-events-auto absolute top-[91%] md:top-[81%] -translate-x-1/2 inline-flex items-center gap-1.5 h-9 pl-3 pr-3.5 rounded-full glass shadow-float text-[13px] font-semibold text-fg"
+      >
+        <motion.span animate={{ rotate: flipped ? 180 : 0 }} transition={spring.pop} className="grid place-items-center">
+          <RotateCw size={15} strokeWidth={2.5} />
+        </motion.span>
+        {t.flipCard}
+      </motion.button>
     </div>
   );
 }

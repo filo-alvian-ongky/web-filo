@@ -1,11 +1,12 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { BriefcaseBusiness, Calendar } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
+import Reveal from "../../components/ui/Reveal";
+import Tilt from "../../components/ui/Tilt";
 import { chip } from "../../components/ui/styles";
 import { experiences } from "@/lib/data";
-import { fadeUp, spring, stagger } from "@/lib/motion";
+import { spring } from "@/lib/motion";
 import { useLang } from "@/lib/i18n";
 
 export default function Experience() {
@@ -19,9 +20,9 @@ export default function Experience() {
       />
 
       <section className="px-4 md:px-6">
-        <motion.ol variants={stagger(0.15, 0.2)} initial="hidden" animate="visible" className="mx-auto max-w-4xl space-y-3 md:space-y-6">
+        <ol className="mx-auto max-w-4xl space-y-3 md:space-y-6">
           {experiences.map((exp, i) => (
-            <motion.li key={exp.role} variants={fadeUp} className="relative md:pl-16">
+            <Reveal as="li" key={exp.role} tilt={false} className="relative md:pl-16">
               {/* Garis waktu (desktop) */}
               {i < experiences.length - 1 && <span aria-hidden className="hidden md:block absolute left-5 top-14 -bottom-6 w-px bg-separator" />}
               <span
@@ -32,7 +33,7 @@ export default function Experience() {
                 <BriefcaseBusiness size={18} />
               </span>
 
-              <motion.article whileHover={{ y: -4 }} transition={spring.press} className="card p-6 md:p-8">
+              <Tilt as="article" whileHover={{ y: -4 }} transition={spring.press} className="card p-6 md:p-8">
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <span className="md:hidden grid place-items-center w-11 h-11 rounded-[14px] text-white shrink-0" style={{ background: exp.tone }}>
@@ -67,10 +68,10 @@ export default function Experience() {
                     );
                   })}
                 </div>
-              </motion.article>
-            </motion.li>
+              </Tilt>
+            </Reveal>
           ))}
-        </motion.ol>
+        </ol>
       </section>
     </>
   );

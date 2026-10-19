@@ -57,6 +57,7 @@ const dict = {
     photoOf: "Foto",
     badgeLabel: "Kartu ID 3D — tarik untuk berinteraksi",
     badgeTagline: "Mari bekerja sama.",
+    flipCard: "Balik kartu",
 
     expEyebrow: "Perjalanan Karier",
     expTitle: "Pengalaman",
@@ -84,8 +85,6 @@ const dict = {
     footerText: "Saya selalu terbuka untuk membahas proyek baru dan peluang. Ayo ciptakan sesuatu yang luar biasa bersama!",
     phone: "Telepon",
     rights: "Hak cipta dilindungi.",
-    madeWith: "Dibuat dengan",
-    by: "oleh",
 
     contactSub: "Pilih kanal yang paling nyaman untuk Anda.",
 
@@ -140,6 +139,7 @@ const dict = {
     photoOf: "Photo of",
     badgeLabel: "3D ID card — drag to interact",
     badgeTagline: "Let's work together.",
+    flipCard: "Flip card",
 
     expEyebrow: "Career Journey",
     expTitle: "Experience",
@@ -167,8 +167,6 @@ const dict = {
     footerText: "I'm always open to discussing new projects and opportunities. Let's create something amazing together!",
     phone: "Phone",
     rights: "All rights reserved.",
-    madeWith: "Made with",
-    by: "by",
 
     contactSub: "Pick whichever channel suits you best.",
 

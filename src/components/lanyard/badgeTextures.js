@@ -49,31 +49,27 @@ function makeCanvas(w, h) {
   return [canvas, canvas.getContext("2d")];
 }
 
-function drawSlot(ctx, c) {
-  ctx.fillStyle = c.slot;
-  roundRect(ctx, W / 2 - 78, 64, 156, 26, 13);
-  ctx.fill();
+// Logo (public/logo.svg) diwarnai ulang sesuai tema kartu
+export const LOGO_SRC = "/logo.svg";
+
+function tintedLogo(logo, size, color) {
+  const [canvas, ctx] = makeCanvas(size, size);
+  ctx.drawImage(logo, 0, 0, size, size);
+  ctx.globalCompositeOperation = "source-in";
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, size, size);
+  return canvas;
 }
 
-function drawFront({ img, profile, c, font }) {
+function drawFront({ img, logo, profile, c, font }) {
   const [canvas, ctx] = makeCanvas(W, H);
   ctx.fillStyle = c.bg;
   ctx.fillRect(0, 0, W, H);
-  drawSlot(ctx, c);
 
   // Header: logo + domain
   const pad = 72;
-  ctx.fillStyle = PALETTE.light.accent;
-  roundRect(ctx, pad, 128, 84, 84, 26);
-  ctx.fill();
-  ctx.fillStyle = "#ffffff";
-  ctx.font = `800 50px ${font}`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(profile.firstName[0], pad + 42, 172);
+  ctx.drawImage(tintedLogo(logo, 168, c.fg), pad - 4, 128, 88, 88);
 
-  ctx.textAlign = "left";
-  ctx.textBaseline = "alphabetic";
   ctx.fillStyle = c.fg;
   ctx.font = `700 36px ${font}`;
   ctx.fillText(profile.domain, pad + 108, 166);
@@ -143,7 +139,7 @@ function drawFront({ img, profile, c, font }) {
   return canvas;
 }
 
-function drawBack({ profile, c, font }) {
+function drawBack({ logo, profile, font }) {
   const [canvas, ctx] = makeCanvas(W, H);
   const g = ctx.createLinearGradient(0, 0, W, H);
   g.addColorStop(0, "#2f86ff");
@@ -164,16 +160,22 @@ function drawBack({ profile, c, font }) {
     ctx.fill();
   }
 
-  drawSlot(ctx, { slot: "rgba(255,255,255,0.28)" });
+
+  // Logo besar di tengah
+  const logoSize = 420;
+  ctx.drawImage(tintedLogo(logo, logoSize, "#ffffff"), (W - logoSize) / 2, 250, logoSize, logoSize);
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#ffffff";
+  const nameSize = fitText(ctx, profile.name, W - 168, 800, 70, font);
+  ctx.font = `800 ${nameSize}px ${font}`;
+  ctx.fillText(profile.name, W / 2, 820);
+  ctx.font = `600 42px ${font}`;
+  ctx.fillStyle = "rgba(255,255,255,0.9)";
+  ctx.fillText(profile.tagline ?? "", W / 2, 892);
+  ctx.textAlign = "left";
 
   const pad = 84;
-  ctx.fillStyle = "#ffffff";
-  ctx.font = `800 220px ${font}`;
-  ctx.fillText(`${profile.firstName}.`, pad - 8, 620);
-  ctx.font = `600 46px ${font}`;
-  ctx.fillStyle = "rgba(255,255,255,0.92)";
-  ctx.fillText(profile.tagline ?? "", pad, 720);
-
   ctx.font = `500 32px ${font}`;
   ctx.fillStyle = "rgba(255,255,255,0.78)";
   ctx.fillText(profile.email, pad, 1240);
@@ -184,18 +186,23 @@ function drawBack({ profile, c, font }) {
   return canvas;
 }
 
-function drawBand({ profile, font }) {
+function drawBand({ logo, profile, font }) {
   const [canvas, ctx] = makeCanvas(1024, 128);
   ctx.fillStyle = "#0a6cf5";
   ctx.fillRect(0, 0, 1024, 128);
   ctx.fillStyle = "rgba(255,255,255,0.18)";
   ctx.fillRect(0, 10, 1024, 3);
   ctx.fillRect(0, 115, 1024, 3);
-  ctx.fillStyle = "#ffffff";
+  // Nama + logo, ditengahkan
+  const text = profile.name.toUpperCase();
+  const logoSize = 76;
   ctx.font = `800 52px ${font}`;
-  ctx.textAlign = "center";
+  const total = ctx.measureText(text).width + 28 + logoSize;
+  const start = (1024 - total) / 2;
+  ctx.fillStyle = "#ffffff";
   ctx.textBaseline = "middle";
-  ctx.fillText(`${profile.name.toUpperCase()}  ✦`, 512, 66);
+  ctx.fillText(text, start, 66);
+  ctx.drawImage(tintedLogo(logo, logoSize * 2, "#ffffff"), start + total - logoSize, 26, logoSize, logoSize);
   return canvas;
 }
 
@@ -211,12 +218,12 @@ export async function createBadgeTextures({ profile, dark, anisotropy = 8 }) {
   if (document.fonts) {
     await Promise.all(["500", "600", "700", "800"].map((w) => document.fonts.load(`${w} 40px ${font}`).catch(() => null)));
   }
-  const img = await loadImage(profile.photo);
+  const [img, logo] = await Promise.all([loadImage(profile.photo), loadImage(LOGO_SRC)]);
   const c = dark ? PALETTE.dark : PALETTE.light;
 
-  const front = toTexture(drawFront({ img, profile, c, font }), anisotropy);
-  const back = toTexture(drawBack({ profile, c, font }), anisotropy);
-  const band = toTexture(drawBand({ profile, font }), anisotropy);
+  const front = toTexture(drawFront({ img, logo, profile, c, font }), anisotropy);
+  const back = toTexture(drawBack({ logo, profile, font }), anisotropy);
+  const band = toTexture(drawBand({ logo, profile, font }), anisotropy);
   band.wrapS = band.wrapT = THREE.RepeatWrapping;
 
   return { front, back, band, edge: c.bg, dark };

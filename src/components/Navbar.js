@@ -9,6 +9,7 @@ import { navItems, profile } from "@/lib/data";
 import { LANGS, useLang } from "@/lib/i18n";
 import { useUI } from "./providers/UIProvider";
 import { iconBtn } from "./ui/styles";
+import BrandLogo from "./ui/BrandLogo";
 import { useSlidingPill } from "./ui/useSlidingPill";
 
 export const isActivePath = (pathname, path) => (path === "/" ? pathname === "/" : pathname?.startsWith(path));
@@ -17,9 +18,7 @@ export function Logo({ compactUntilLg = false }) {
   const { t } = useLang();
   return (
     <Link href="/" aria-label={`${profile.domain} — ${t.home}`} className="pressable inline-flex items-center gap-2.5 shrink-0">
-      <span className="grid place-items-center w-9 h-9 rounded-[12px] bg-accent text-white text-lg font-extrabold shadow-[0_6px_16px_-6px_rgba(10,108,245,0.8)]">
-        {profile.firstName[0]}
-      </span>
+      <BrandLogo className="w-9 h-9 text-fg transition-colors" />
       <span className={`text-[17px] font-bold tracking-tight text-fg ${compactUntilLg ? "hidden lg:inline" : ""}`}>
         <span className="text-accent-fg">FiloAlvian</span>.com
       </span>
