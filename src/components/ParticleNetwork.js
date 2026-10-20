@@ -51,7 +51,9 @@ export default function ParticleNetwork() {
     const spawn = () => {
       const angle = Math.random() * Math.PI * 2;
       const v = cfg.speed * (0.4 + Math.random() * 0.6);
-      return { x: Math.random() * w, y: Math.random() * h, vx: Math.cos(angle) * v, vy: Math.sin(angle) * v, r: 1.1 + Math.random() * 1.5 };
+      const r = 1.1 + Math.random() * 1.5;
+      // depth: titik besar terasa lebih dekat → ikut bergeser lebih jauh saat halaman digulir (parallax)
+      return { x: Math.random() * w, y: Math.random() * h, vx: Math.cos(angle) * v, vy: Math.sin(angle) * v, r, depth: 0.05 + ((r - 1.1) / 1.5) * 0.2 };
     };
 
     const draw = () => {
@@ -125,13 +127,30 @@ export default function ParticleNetwork() {
       draw();
     };
 
+    // Selisih scroll yang belum diterapkan (dibatasi agar lompatan pindah halaman tidak mengacak titik)
+    let lastScroll = window.scrollY;
+    let scrollDelta = 0;
+    const onScroll = () => {
+      const y = window.scrollY;
+      scrollDelta += y - lastScroll;
+      lastScroll = y;
+    };
+
     let last = performance.now();
     const tick = (now) => {
       const dt = Math.min((now - last) / 16.67, 3);
       last = now;
+      const shift = Math.max(-120, Math.min(120, scrollDelta));
+      scrollDelta = 0;
       for (const p of particles) {
         p.x += p.vx * dt;
         p.y += p.vy * dt;
+        if (shift) {
+          // Geser berlawanan arah scroll; titik yang keluar layar muncul lagi dari sisi seberang
+          p.y -= shift * p.depth;
+          if (p.y < 0) p.y += h;
+          else if (p.y > h) p.y -= h;
+        }
         if (p.x < 0 || p.x > w) {
           p.vx *= -1;
           p.x = Math.max(0, Math.min(w, p.x));
@@ -174,6 +193,7 @@ export default function ParticleNetwork() {
     if (!reduceMotion) raf = requestAnimationFrame(tick);
 
     window.addEventListener("resize", resize);
+    if (!reduceMotion) window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     document.addEventListener("pointerout", onPointerOut);
     window.addEventListener("blur", clearPointer);
@@ -186,6 +206,7 @@ export default function ParticleNetwork() {
       clearTimeout(touchTimer);
       redrawRef.current = null;
       window.removeEventListener("resize", resize);
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointerMove);
       document.removeEventListener("pointerout", onPointerOut);
       window.removeEventListener("blur", clearPointer);

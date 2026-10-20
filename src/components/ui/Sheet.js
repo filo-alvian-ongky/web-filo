@@ -57,7 +57,8 @@ export default function Sheet({ open, onClose, title, subtitle, children, size =
   return createPortal(
     <AnimatePresence>
       {open && (
-        <div key="sheet" className="fixed inset-0 z-[200]">
+        // data-lenis-prevent: isi sheet di-scroll secara native, bukan oleh smooth scroll halaman
+        <div key="sheet" data-lenis-prevent className="fixed inset-0 z-[200]">
           <motion.div
             className="absolute inset-0 bg-black/45 backdrop-blur-[3px]"
             initial={{ opacity: 0 }}

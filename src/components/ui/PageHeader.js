@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useUI } from "@/components/providers/UIProvider";
 import { fadeUp, stagger } from "@/lib/motion";
+import RevealWords from "./RevealWords";
 
 /**
  * Header halaman ala One UI "expanded app bar":
@@ -43,9 +44,9 @@ export default function PageHeader({ eyebrow, title, description, children }) {
             {eyebrow}
           </motion.p>
         )}
-        <motion.h1 ref={titleRef} variants={fadeUp} className="text-[2.6rem] leading-[1.05] md:text-7xl font-extrabold tracking-tight text-fg">
-          {title}
-        </motion.h1>
+        <h1 ref={titleRef} className="text-[2.6rem] leading-[1.05] md:text-7xl font-extrabold tracking-tight text-fg">
+          <RevealWords text={title} inView={false} delay={eyebrow ? 0.12 : 0} stagger={0.08} />
+        </h1>
         {description && (
           <motion.p variants={fadeUp} className="mt-4 md:mt-5 max-w-2xl text-base md:text-lg text-fg-2 leading-relaxed">
             {description}

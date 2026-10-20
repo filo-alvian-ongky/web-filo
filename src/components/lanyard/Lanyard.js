@@ -32,7 +32,7 @@ function StaticBadge({ profile }) {
  *                     agar kanvas bisa menutupi area luas tanpa menghalangi klik.
  * @param anchorRef    elemen yang menentukan posisi horizontal titik gantung lanyard.
  */
-export default function Lanyard({ profile, onTap, eventSource, anchorRef, className = "" }) {
+export default function Lanyard({ profile, onTap, eventSource, anchorRef, className = "", style }) {
   const ref = useRef(null);
   const { theme } = useUI();
   const { t } = useLang();
@@ -66,7 +66,8 @@ export default function Lanyard({ profile, onTap, eventSource, anchorRef, classN
   }, [anchorRef]);
 
   return (
-    <div ref={ref} className={className}>
+    // style: dipakai efek parallax scroll di hero (motion value)
+    <motion.div ref={ref} className={className} style={style}>
       <LanyardScene
         profile={profile}
         dark={theme === "dark"}
@@ -97,6 +98,6 @@ export default function Lanyard({ profile, onTap, eventSource, anchorRef, classN
         </motion.span>
         {t.flipCard}
       </motion.button>
-    </div>
+    </motion.div>
   );
 }

@@ -42,7 +42,7 @@ export function Logo({ compactUntilLg = false, title = null }) {
   );
 }
 
-function ThemeToggle() {
+export function ThemeToggle() {
   const { theme, toggleTheme } = useUI();
   const { t } = useLang();
   const dark = theme === "dark";

@@ -54,4 +54,5 @@ export const slideIn = {
   visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: EASE_IOS } },
 };
 
-export const viewportOnce = { once: true, margin: "-60px" };
+// Margin hanya vertikal (bawah): elemen sempit di tepi kiri/kanan layar tetap terpicu
+export const viewportOnce = { once: true, margin: "0px 0px -60px 0px" };

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useSyncExternalStore } from "react";
+import { getLenis } from "./smoothScroll";
 
 const noopSubscribe = () => () => {};
 
@@ -29,9 +30,13 @@ export function useScrollLock(active) {
     if (!active) return;
     scrollLocks += 1;
     document.documentElement.style.overflow = "hidden";
+    getLenis()?.stop();
     return () => {
       scrollLocks -= 1;
-      if (scrollLocks === 0) document.documentElement.style.overflow = "";
+      if (scrollLocks === 0) {
+        document.documentElement.style.overflow = "";
+        getLenis()?.start();
+      }
     };
   }, [active]);
 }

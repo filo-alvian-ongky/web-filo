@@ -12,6 +12,7 @@ import ContactSheet from "./ContactSheet";
 import IntroModal from "./element/IntroModal";
 import FiloAssistant from "./FiloAssistant";
 import ParticleNetwork from "./ParticleNetwork";
+import SmoothScroll from "./providers/SmoothScroll";
 
 // Judul tab browser ikut bahasa yang dipilih (metadata server tetap versi Indonesia)
 const TITLES = {
@@ -40,11 +41,26 @@ function DocumentTitle() {
 }
 
 export default function AppShell({ children }) {
+  const pathname = usePathname();
+
+  // Panel admin (CMS): latar yang sama dengan website, tapi tanpa navbar, tab bar & footer publik
+  if (pathname.startsWith("/admin")) {
+    return (
+      <UIProvider>
+        <MotionConfig reducedMotion="user">
+          <ParticleNetwork />
+          {children}
+        </MotionConfig>
+      </UIProvider>
+    );
+  }
+
   return (
     <UIProvider>
       {/* Hormati pengaturan "kurangi gerakan" di perangkat pengguna */}
       <MotionConfig reducedMotion="user">
         <DocumentTitle />
+        <SmoothScroll />
         <ParticleNetwork />
         <Navbar />
         <main id="konten" className="min-h-svh">

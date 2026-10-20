@@ -1,19 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
-import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, Calendar, ChevronRight, FileText } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { ArrowUpRight, BadgeCheck, Calendar, ChevronRight, FileText } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
 import SegmentedControl from "../../components/ui/SegmentedControl";
 import Reveal from "../../components/ui/Reveal";
 import Sheet from "../../components/ui/Sheet";
 import { btn, chip } from "../../components/ui/styles";
-import { achievementFilters, achievements, categoryLabel } from "@/lib/data";
+import { achievementFilters, categoryLabel } from "@/lib/data";
 import { EASE_IOS, spring } from "@/lib/motion";
 import { useLang } from "@/lib/i18n";
 
-export default function Achievements() {
+/**
+ * Thumbnail sertifikat: gambar "mendarat" (sedikit diperbesar lalu normal) saat kartu muncul,
+ * lalu bergeser pelan berlawanan arah scroll (parallax) di dalam bingkainya.
+ */
+function ParallaxThumb({ badge, children }) {
+  const ref = useRef(null);
+  const reduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], ["-6%", "6%"]);
+  return (
+    <div ref={ref} className="relative aspect-[1.414] bg-surface-2 overflow-hidden">
+      {/* Gambar dibuat 16% lebih tinggi dari bingkai agar tepinya tidak terlihat saat bergeser */}
+      <motion.div
+        className="absolute inset-x-0 -inset-y-[8%]"
+        style={reduceMotion ? undefined : { y }}
+        initial={{ scale: 1.14 }}
+        whileInView={{ scale: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1.1, ease: EASE_IOS }}
+      >
+        {children}
+      </motion.div>
+      {badge}
+    </div>
+  );
+}
+
+export default function Achievements({ achievements }) {
   const { t, L, date } = useLang();
   const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState(null);
@@ -46,34 +73,29 @@ export default function Achievements() {
           <AnimatePresence mode="popLayout" initial={false}>
             {list.map((a) => (
               // Lapisan luar: animasi filter (layout & keluar). Tengah: animasi scroll ala Jitter. Dalam: hover/tap.
-              <motion.div layout key={a.image} exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.2 } }} transition={spring.sheet}>
+              <motion.div layout key={a.id} exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.2 } }} transition={spring.sheet}>
                 <Reveal className="h-full">
                   <motion.button
-                    whileHover={{ y: -4 }}
                     whileTap={{ scale: 0.98 }}
                     transition={spring.press}
                     onClick={() => openDetail(a)}
                     className="card group w-full h-full text-left overflow-hidden"
                   >
-                    <div className="relative aspect-[1.414] bg-surface-2 overflow-hidden">
-                      {/* Gambar "mendarat": sedikit diperbesar lalu kembali normal saat kartu muncul */}
-                      <motion.div
-                        className="absolute inset-0"
-                        initial={{ scale: 1.14 }}
-                        whileInView={{ scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1.1, ease: EASE_IOS }}
-                      >
-                        <Image
-                          src={a.thumb}
-                          alt={`${t.certificate} ${L(a.title)}`}
-                          fill
-                          sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
-                          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                        />
-                      </motion.div>
-                      <span className="absolute top-3 left-3 inline-flex items-center h-7 px-2.5 rounded-full glass text-[11px] font-bold text-fg">{L(categoryLabel[a.category])}</span>
-                    </div>
+                    <ParallaxThumb
+                      badge={
+                        <span className="absolute top-3 left-3 inline-flex items-center h-7 px-2.5 rounded-full glass text-[11px] font-bold text-fg">
+                          {L(categoryLabel[a.category])}
+                        </span>
+                      }
+                    >
+                      <Image
+                        src={a.thumb}
+                        alt={`${t.certificate} ${L(a.title)}`}
+                        fill
+                        sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                      />
+                    </ParallaxThumb>
                     <div className="p-5">
                       <h2 className="text-lg font-bold text-fg leading-snug">{L(a.title)}</h2>
                       <p className="mt-1 text-sm text-fg-2">{a.provider}</p>
@@ -115,6 +137,11 @@ export default function Achievements() {
                 <span className={chip}>{L(categoryLabel[selected.category])}</span>
               </div>
               <div className="flex gap-2">
+                {selected.link && (
+                  <a href={selected.link} target="_blank" rel="noopener noreferrer" className={`${btn.tonal} h-10 px-4 text-sm`}>
+                    <BadgeCheck size={16} /> {t.verifyLink}
+                  </a>
+                )}
                 {selected.file && (
                   <a href={selected.file} target="_blank" rel="noopener noreferrer" className={`${btn.tonal} h-10 px-4 text-sm`}>
                     <FileText size={16} /> {t.pdfDoc}

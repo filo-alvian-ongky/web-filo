@@ -29,7 +29,7 @@ export default function IntroModal() {
   return (
     <AnimatePresence>
       {introOpen && (
-        <div key="intro" className="fixed inset-0 z-[210]">
+        <div key="intro" data-lenis-prevent className="fixed inset-0 z-[210]">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

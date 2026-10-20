@@ -6,6 +6,7 @@ import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import { ArrowUp, Bot, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { spring } from "@/lib/motion";
+import { safeHttpUrl } from "@/lib/embeds.mjs";
 import { useEscape, useIsClient, useMediaQuery, useScrollLock } from "@/lib/hooks";
 import { useUI } from "./providers/UIProvider";
 import { useLang } from "@/lib/i18n";
@@ -17,6 +18,18 @@ const markdown = {
   li: (props) => <li className="leading-relaxed" {...props} />,
   strong: (props) => <strong className="font-semibold text-accent-fg" {...props} />,
   em: (props) => <em className="italic" {...props} />,
+  // Link dari jawaban AI: hanya http(s)/mailto, selalu tab baru tanpa akses ke halaman ini
+  a: ({ node, href, children, ...props }) => {
+    const safe = href?.startsWith("mailto:") ? href : safeHttpUrl(href);
+    if (!safe) return <span>{children}</span>;
+    return (
+      <a href={safe} target="_blank" rel="noopener noreferrer nofollow" className="font-semibold text-accent-fg underline underline-offset-2" {...props}>
+        {children}
+      </a>
+    );
+  },
+  // Gambar dari jawaban AI tidak ditampilkan (mencegah pelacakan / konten asing)
+  img: () => null,
 };
 
 function TypingBubble({ label }) {
@@ -137,6 +150,8 @@ export default function FiloAssistant() {
           <motion.div
             role="dialog"
             aria-label="Filo Career AI"
+            // Riwayat chat di-scroll native (bukan ikut menggulir halaman lewat smooth scroll)
+            data-lenis-prevent
             {...panelMotion}
             {...dragProps}
             className="pointer-events-auto absolute inset-x-0 bottom-0 h-[88svh] rounded-t-[2rem] md:inset-x-auto md:bottom-6 md:right-6 md:h-[600px] md:max-h-[calc(100vh-7rem)] md:w-[400px] md:rounded-[2rem] bg-surface shadow-float flex flex-col overflow-hidden"
@@ -199,6 +214,7 @@ export default function FiloAssistant() {
                 <input
                   ref={inputRef}
                   type="text"
+                  maxLength={1000}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
