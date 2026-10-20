@@ -133,16 +133,25 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Desktop: navbar kaca melayang */}
-      <header className="hidden md:block fixed inset-x-0 top-0 z-50 px-6 pt-4 pointer-events-none">
+      {/* Desktop: di puncak halaman navbar melebar tanpa latar (logo di pojok kiri, menu di tengah,
+          tombol di pojok kanan); saat digulir menyusut mulus menjadi pil kaca melayang */}
+      <header
+        className={`hidden md:block fixed inset-x-0 top-0 z-50 pointer-events-none transition-[padding] duration-500 ease-[var(--ease-ios)] ${
+          scrolled ? "px-6 pt-4" : "px-0 pt-0"
+        }`}
+      >
         <nav
           aria-label={t.mainNav}
-          className={`pointer-events-auto mx-auto max-w-6xl h-16 rounded-full glass pl-4 pr-2 flex items-center justify-between gap-3 transition-shadow duration-300 ${
-            scrolled ? "shadow-float" : "shadow-none"
+          className={`pointer-events-auto mx-auto grid grid-cols-[1fr_auto_1fr] items-center gap-3 border transition-[max-width,height,padding,border-radius,background-color,border-color,box-shadow,backdrop-filter] duration-500 ease-[var(--ease-ios)] ${
+            scrolled
+              ? "max-w-6xl h-16 rounded-[2rem] pl-4 pr-2 bg-glass border-[color:var(--glass-border)] shadow-float backdrop-blur-[22px] backdrop-saturate-[1.8]"
+              : "max-w-full h-[76px] rounded-none px-6 bg-transparent border-transparent shadow-none backdrop-blur-[0px] backdrop-saturate-100"
           }`}
         >
-          <Logo compactUntilLg />
-          <ul className="relative flex items-center gap-1">
+          <div className="justify-self-start">
+            <Logo compactUntilLg />
+          </div>
+          <ul className="relative flex items-center gap-1 justify-self-center">
             {/* Satu indikator yang bergeser ke samping mengikuti halaman aktif */}
             <motion.span aria-hidden style={pill.style} className="absolute top-0 left-0 rounded-full bg-accent-soft" />
             {navItems.map((item) => {
@@ -163,7 +172,7 @@ export default function Navbar() {
               );
             })}
           </ul>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 justify-self-end">
             <button
               onClick={openAI}
               aria-label={t.askFiloAI}

@@ -34,8 +34,13 @@ const check = ({ error, data }) => {
   return data;
 };
 
-// Perbarui seluruh halaman publik (ISR) setelah konten berubah
-const refreshSite = () => revalidatePath("/", "layout");
+// Perbarui seluruh halaman publik (ISR) + PDF CV + saran pertanyaan Filo AI setelah konten berubah
+const refreshSite = () => {
+  revalidatePath("/", "layout");
+  revalidatePath("/cv/id");
+  revalidatePath("/cv/en");
+  revalidatePath("/api/chat/suggestions");
+};
 
 const bilingual = (v) => {
   const id = (v?.id ?? "").trim();

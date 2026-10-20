@@ -49,6 +49,54 @@ function TypingBubble({ label }) {
   );
 }
 
+// Riwayat yang dikirim ke AI (sama dengan batas di server /api/chat)
+const MAX_TURNS = 12;
+const MAX_CHARS = 1000;
+
+// Ditolak server karena aturan (batas pesan, validasi, dll.) → tidak perlu diulang tanpa streaming
+class ChatRejected extends Error {}
+
+/**
+ * Minta jawaban AI. Utamanya streaming (teks muncul bertahap lewat `onChunk`);
+ * bila browser/jaringan/server gagal mengalirkan, ulangi sekali tanpa streaming.
+ */
+async function requestAnswer(history, lang, onChunk) {
+  const post = (stream) =>
+    fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: history, lang, stream }),
+    });
+
+  let streamed = "";
+  try {
+    const res = await post(true);
+    if (res.ok && res.body && res.headers.get("content-type")?.startsWith("text/plain")) {
+      const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        streamed += value;
+        onChunk(streamed);
+      }
+      if (streamed.trim()) return streamed;
+    } else if (res.status < 500) {
+      const data = await res.json().catch(() => ({}));
+      throw new ChatRejected(data.error);
+    }
+  } catch (error) {
+    if (error instanceof ChatRejected) throw error;
+    // Aliran terputus di tengah jalan → pertahankan jawaban yang sudah sampai
+    if (streamed.trim()) return streamed;
+    console.warn("Streaming gagal, beralih ke mode biasa:", error);
+  }
+
+  const res = await post(false);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Gagal menghubungi AI");
+  return data.content;
+}
+
 export default function FiloAssistant() {
   const { aiOpen: isOpen, closeAI: onClose } = useUI();
   const { lang, t } = useLang();
@@ -56,9 +104,14 @@ export default function FiloAssistant() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  // Saran pertanyaan dari konten CMS ({ id: [...], en: [...] }); sebelum termuat pakai kamus
+  const [suggestions, setSuggestions] = useState(null);
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
   const isSendingRef = useRef(false);
+  const nextIdRef = useRef(0);
+  // Ikuti jawaban yang sedang mengalir hanya bila pengunjung tidak sedang menggulir ke atas
+  const stickToBottomRef = useRef(true);
 
   const isClient = useIsClient();
   const isMobile = !useMediaQuery("(min-width: 768px)", true);
@@ -68,7 +121,7 @@ export default function FiloAssistant() {
   useEscape(isOpen, onClose);
 
   useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (scrollRef.current && stickToBottomRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, isTyping]);
 
   useEffect(() => {
@@ -77,36 +130,61 @@ export default function FiloAssistant() {
     return () => clearTimeout(id);
   }, [isOpen, isMobile]);
 
+  // Saran dimuat sekali saat panel pertama kali dibuka (gagal → tetap saran bawaan)
+  useEffect(() => {
+    if (!isOpen || suggestions) return;
+    let alive = true;
+    fetch("/api/chat/suggestions")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (alive && data?.id?.length) setSuggestions(data);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [isOpen, suggestions]);
+
   const sendMessage = async (preset) => {
     const text = (preset ?? input).trim();
     if (!text || isTyping || isSendingRef.current) return;
 
     isSendingRef.current = true;
+    stickToBottomRef.current = true;
     setIsTyping(true);
 
-    const userMsg = { role: "user", content: text };
+    const userMsg = { id: nextIdRef.current++, role: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
 
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [...messages, userMsg], lang }),
+    // Riwayat untuk AI: tanpa pesan error, hanya beberapa pesan terakhir & dipotong
+    const history = [...messages, userMsg]
+      .filter((m) => !m.error)
+      .slice(-MAX_TURNS)
+      .map((m) => ({ role: m.role, content: m.content.slice(0, MAX_CHARS) }));
+
+    const replyId = nextIdRef.current++;
+    const showReply = (content, extra) =>
+      setMessages((prev) => {
+        const reply = { id: replyId, role: "assistant", content, ...extra };
+        const i = prev.findIndex((m) => m.id === replyId);
+        return i === -1 ? [...prev, reply] : prev.map((m, j) => (j === i ? reply : m));
       });
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Gagal menghubungi AI");
-
-      setMessages((prev) => [...prev, { role: "assistant", content: data.content }]);
+    try {
+      showReply(await requestAnswer(history, lang, (partial) => showReply(partial, { streaming: true })));
     } catch (error) {
       console.error("Chat Error:", error);
-      setMessages((prev) => [...prev, { role: "assistant", content: t.aiError }]);
+      showReply(t.aiError, { error: true });
     } finally {
       setIsTyping(false);
       isSendingRef.current = false;
     }
   };
+
+  const chips = suggestions?.[lang]?.length ? suggestions[lang] : t.aiSuggestions;
+  // Titik "mengetik" hanya sampai potongan jawaban pertama muncul
+  const waiting = isTyping && messages.at(-1)?.role === "user";
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -178,12 +256,22 @@ export default function FiloAssistant() {
             </div>
 
             {/* Riwayat chat */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto overscroll-contain px-4 py-5 space-y-2.5" aria-live="polite">
+            <div
+              ref={scrollRef}
+              onScroll={(e) => {
+                const el = e.currentTarget;
+                stickToBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+              }}
+              className="flex-1 overflow-y-auto overscroll-contain px-4 py-5 space-y-2.5"
+              aria-live="polite"
+              // Pembaca layar menunggu jawaban selesai mengalir sebelum membacakannya
+              aria-busy={isTyping}
+            >
               <div className="flex justify-start">
                 <div className="max-w-[82%] px-4 py-2.5 text-[14px] leading-relaxed bg-surface-2 text-fg rounded-[20px] rounded-bl-md">{t.aiGreeting}</div>
               </div>
-              {messages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+              {messages.map((msg) => (
+                <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div
                     className={`max-w-[82%] px-4 py-2.5 text-[14px] leading-relaxed ${
                       msg.role === "user"
@@ -195,11 +283,11 @@ export default function FiloAssistant() {
                   </div>
                 </div>
               ))}
-              {isTyping && <TypingBubble label={t.aiTyping} />}
+              {waiting && <TypingBubble label={t.aiTyping} />}
 
               {messages.length === 0 && !isTyping && (
                 <div className="pt-3 flex flex-wrap gap-2">
-                  {t.aiSuggestions.map((s) => (
+                  {chips.map((s) => (
                     <button key={s} onClick={() => sendMessage(s)} className="pressable h-9 px-3.5 rounded-full text-[13px] font-semibold bg-accent-soft text-accent-fg">
                       {s}
                     </button>

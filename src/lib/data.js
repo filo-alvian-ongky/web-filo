@@ -16,7 +16,35 @@ export const profile = {
   phone: "+62 (821) 4046-4565",
   phoneHref: "tel:+6282140464565",
   photo: "/profile.jpeg",
-  cv: { id: "/cv.pdf", en: "/cv-en.pdf" },
+  // CV dibuat otomatis dari konten CMS (lihat src/app/cv/[lang]/route.js)
+  cv: { id: "/cv/id", en: "/cv/en" },
+};
+
+// Bagian CV yang tidak dikelola CMS. Pengalaman, prestasi, sertifikasi, proyek & keahlian
+// diambil otomatis dari CMS (yang terbaru & terbaik) — lihat src/lib/cv/select.js
+export const cvProfile = {
+  headline: { id: "Mahasiswa Ilmu Komputer · BINUS University", en: "Computer Science Student · BINUS University" },
+  summary: {
+    id: "Mahasiswa Ilmu Komputer di BINUS University yang berfokus pada pengembangan sistem cerdas, UI/UX, dan riset IoT. Terbuka untuk membahas proyek baru dan peluang kolaborasi.",
+    en: "Computer Science student at BINUS University focused on intelligent systems development, UI/UX, and IoT research. Open to discussing new projects and collaboration opportunities.",
+  },
+  education: { school: "BINUS University (Semarang)", major: { id: "Ilmu Komputer (Computer Science)", en: "Computer Science" } },
+  publication: {
+    title:
+      "Optimizing Productivity: Internet of Things based Workload and Stress Monitoring using Galvanic Skin Response (GSR) Sensor Analysis and Microcontroller Arduino Uno",
+    authors: "F. A. Ongky, M. E. Kartiyoso, S. R. N. Gunawan, A. L. Dewi, V. J. L. Engel",
+    venue: {
+      id: "Procedia Computer Science · dipresentasikan (oral) di 10th ICCSCI 2025, 31 Juli – 1 Agustus 2025",
+      en: "Procedia Computer Science · oral presentation at the 10th ICCSCI 2025, July 31 – August 1, 2025",
+    },
+  },
+  contacts: [
+    { label: { id: "Email", en: "Email" }, value: "filoalvianongky@gmail.com", href: "mailto:filoalvianongky@gmail.com" },
+    { label: { id: "Telepon", en: "Phone" }, value: "+62 821-4046-4565", href: "tel:+6282140464565" },
+    { label: { id: "Website", en: "Website" }, value: "FiloAlvian.com", href: "https://filoalvian.com" },
+    { label: { id: "LinkedIn", en: "LinkedIn" }, value: "linkedin.com/in/filoalvianongky", href: "https://www.linkedin.com/in/filoalvianongky/" },
+    { label: { id: "GitHub", en: "GitHub" }, value: "github.com/filo-alvian-ongky", href: "https://github.com/filo-alvian-ongky" },
+  ],
 };
 
 export const navItems = [

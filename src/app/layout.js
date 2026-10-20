@@ -1,6 +1,8 @@
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import AppShell from "../components/AppShell";
+import { SITE_URL, personJsonLd } from "@/lib/seo";
+import { profile } from "@/lib/data";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -9,9 +11,17 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata = {
+  // Alamat dasar untuk URL absolut (canonical, og:url, og:image)
+  metadataBase: new URL(SITE_URL),
   title: "Portfolio Filo Alvian Ongky - Mahasiswa Ilmu Komputer & Pengembang",
   description:
     "Situs web pribadi Filo Alvian Ongky, Mahasiswa Ilmu Komputer di BINUS University yang berfokus pada pengembangan sistem cerdas, UI/UX, dan riset IoT.",
+  applicationName: profile.domain,
+  authors: [{ name: profile.name, url: SITE_URL }],
+  creator: profile.name,
+  // Bawaan untuk halaman yang tidak menulis sendiri (canonical ditulis per halaman di page.js)
+  openGraph: { type: "website", siteName: profile.domain, locale: "id_ID", alternateLocale: ["en_US"] },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport = {
@@ -37,6 +47,8 @@ export default function RootLayout({ children }) {
     <html lang="id" className={jakarta.variable} data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        {/* Data terstruktur profil (schema.org Person) untuk mesin pencari; "<" di-escape agar aman di dalam <script> */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd).replace(/</g, "\\u003c") }} />
       </head>
       <body className="antialiased">
         <AppShell>{children}</AppShell>

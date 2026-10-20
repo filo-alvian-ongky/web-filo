@@ -48,6 +48,14 @@ const nextConfig = {
   devIndicators: false,
   // Jangan umumkan framework & versi di header respons
   poweredByHeader: false,
+  // Pembuat PDF CV dijalankan apa adanya di server (tidak di-bundle)
+  serverExternalPackages: ["@react-pdf/renderer"],
+  // File yang dibaca rute CV saat membuat PDF (font & foto) ikut ter-deploy ke server
+  outputFileTracingIncludes: {
+    "/cv/[lang]": ["./src/lib/cv/fonts/**/*", "./public/profile.jpeg"],
+    // Gambar Open Graph (src/lib/og.js) memakai font yang sama + logo
+    "**/opengraph-image*": ["./src/lib/cv/fonts/**/*", "./public/logo.svg"],
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
