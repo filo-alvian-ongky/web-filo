@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
@@ -31,19 +32,23 @@ export async function createAuthSupabase() {
 }
 
 /**
- * User yang sedang login + status admin-nya.
+ * User yang sedang login + status admin-nya (di-cache per request: layout, halaman & query
+ * dalam satu render memakai hasil yang sama).
+ * - Identitas dari getClaims(): tanda tangan JWT diverifikasi di server (kunci publik Supabase
+ *   di-cache), jadi tidak perlu bolak-balik ke server Auth di setiap perpindahan halaman.
  * - isAdmin: email terdaftar di tabel admins
- * - mfaVerified: sesi sudah lolos verifikasi 2 langkah (AAL2) — wajib untuk masuk panel & mengubah data
+ * - mfaVerified: sesi sudah lolos verifikasi 2 langkah (aal2) — wajib untuk masuk panel & mengubah data
  */
-export async function getAdminSession() {
+export const getAdminSession = cache(async () => {
   const supabase = await createAuthSupabase();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { supabase, user: null, isAdmin: false, mfaVerified: false };
-  const [{ data: admin }, { data: aal }] = await Promise.all([
-    supabase.from("admins").select("email").maybeSingle(),
-    supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
-  ]);
-  return { supabase, user, isAdmin: Boolean(admin), mfaVerified: aal?.currentLevel === "aal2" };
-}
+  const { data } = await supabase.auth.getClaims();
+  const claims = data?.claims;
+  if (!claims?.sub) return { supabase, user: null, isAdmin: false, mfaVerified: false };
+  const { data: admin } = await supabase.from("admins").select("email").maybeSingle();
+  return {
+    supabase,
+    user: { id: claims.sub, email: claims.email },
+    isAdmin: Boolean(admin),
+    mfaVerified: claims.aal === "aal2",
+  };
+});

@@ -20,12 +20,13 @@ export async function proxy(request) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims(): memperbarui token bila kedaluwarsa & memverifikasi JWT secara lokal
+  // (tanpa panggilan jaringan ke Supabase di setiap request)
+  const { data } = await supabase.auth.getClaims();
+  const signedIn = Boolean(data?.claims?.sub);
 
   const onLogin = request.nextUrl.pathname.startsWith("/admin/login");
-  if (!user && !onLogin) {
+  if (!signedIn && !onLogin) {
     const login = request.nextUrl.clone();
     login.pathname = "/admin/login";
     login.search = "";

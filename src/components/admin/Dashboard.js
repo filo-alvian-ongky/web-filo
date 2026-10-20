@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowUpRight, ChevronRight, Clock3, Plus } from "lucide-react";
 import AdminPageHeader from "./AdminPageHeader";
 import { ADMIN_NAV } from "./nav";
+import { DASHBOARD } from "./tokens";
 import Card from "@/components/Card";
 import CountUp from "@/components/ui/CountUp";
 import { btn } from "@/components/ui/styles";
@@ -69,17 +70,17 @@ export default function Dashboard({ greeting, stats, activity, setupError }) {
       )}
 
       {/* Widget jumlah konten */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className={DASHBOARD.widgets}>
         {stats.map((s) => {
           const nav = NAV[s.href];
           return (
             <Link key={s.href} href={s.href} className="group block">
-              <Card className="h-full p-4 md:p-5 flex flex-col">
+              <Card className={DASHBOARD.widget}>
                 <div className="flex items-start justify-between gap-2">
                   <Tile tone={nav.tone} icon={nav.icon} />
                   <ChevronRight size={18} className="text-fg-3 transition-transform group-hover:translate-x-0.5" />
                 </div>
-                <p className="mt-5 text-[2rem] md:text-[2.5rem] leading-none font-extrabold tracking-tight text-fg">
+                <p className={`${DASHBOARD.number} text-fg`}>
                   <CountUp value={s.count} />
                 </p>
                 <p className="mt-1.5 text-sm font-semibold text-fg-2">{nav.label}</p>
@@ -92,16 +93,16 @@ export default function Dashboard({ greeting, stats, activity, setupError }) {
         })}
       </div>
 
-      <div className="mt-3 md:mt-4 grid grid-cols-1 lg:grid-cols-5 gap-3 md:gap-4">
+      <div className={DASHBOARD.lower}>
         {/* Aksi cepat */}
-        <Card className="lg:col-span-2 p-2 md:p-3">
-          <h2 className="px-3 pt-3 pb-2 text-lg font-bold text-fg">Tambah cepat</h2>
+        <Card className={DASHBOARD.quick}>
+          <h2 className={`${DASHBOARD.cardTitle} text-lg font-bold text-fg`}>Tambah cepat</h2>
           <motion.ul variants={stagger(0.06, 0.2)} initial="hidden" animate="visible">
             {stats.map((s) => {
               const nav = NAV[s.href];
               return (
                 <motion.li key={s.href} variants={slideIn}>
-                  <Link href={`${s.href}?new=1`} className="group flex items-center gap-3 px-3 py-2.5 rounded-[1.1rem] transition-colors hover:bg-surface-2 active:bg-surface-3">
+                  <Link href={`${s.href}?new=1`} className={`group ${DASHBOARD.row} transition-colors hover:bg-surface-2 active:bg-surface-3`}>
                     <Tile tone={nav.tone} icon={Plus} size="w-9 h-9" iconSize={18} />
                     <span className="flex-1 font-semibold text-fg">Tambah {nav.noun}</span>
                     <ChevronRight size={18} className="text-fg-3 transition-transform group-hover:translate-x-0.5" />
@@ -113,8 +114,8 @@ export default function Dashboard({ greeting, stats, activity, setupError }) {
         </Card>
 
         {/* Aktivitas terbaru */}
-        <Card className="lg:col-span-3 p-2 md:p-3">
-          <div className="flex items-center justify-between px-3 pt-3 pb-2">
+        <Card className={DASHBOARD.activity}>
+          <div className={`flex items-center justify-between ${DASHBOARD.cardTitle}`}>
             <h2 className="text-lg font-bold text-fg">Terakhir diubah</h2>
             {drafts > 0 && <span className="text-sm font-semibold text-fg-3">{drafts} draft belum tampil</span>}
           </div>
@@ -127,7 +128,7 @@ export default function Dashboard({ greeting, stats, activity, setupError }) {
                 const Icon = nav.icon;
                 return (
                   <motion.li key={a.id} variants={slideIn}>
-                    <Link href={a.href} className="group flex items-center gap-3 px-3 py-2.5 rounded-[1.1rem] transition-colors hover:bg-surface-2 active:bg-surface-3">
+                    <Link href={a.href} className={`group ${DASHBOARD.row} transition-colors hover:bg-surface-2 active:bg-surface-3`}>
                       <span className="grid place-items-center w-9 h-9 shrink-0 rounded-full bg-surface-2" style={{ color: nav.tone }}>
                         <Icon size={17} />
                       </span>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import FormSheet from "./FormSheet";
 import ResourceList from "./ResourceList";
+import { MEDIA } from "./tokens";
 import { BilingualInput, ColorInput, Field, ImagePicker, TechPicker, TextInput, Toggle, linkEn, useCloseForm, useToast } from "./fields";
 import ProjectArt, { PROJECT_ICONS } from "@/components/ui/ProjectArt";
 import { saveProject } from "@/app/admin/actions";
@@ -99,9 +100,9 @@ export default function ProjectsManager({ projects, technologies, startNew = fal
           subtitle: p.summary?.id,
           media: p.cover_path ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={mediaUrl(p.thumb_path ?? p.cover_path)} alt="" className="w-16 h-11 rounded-[10px] object-cover shrink-0" />
+            <img src={mediaUrl(p.thumb_path ?? p.cover_path)} alt="" className={`${MEDIA.thumb} object-cover shrink-0`} />
           ) : (
-            <span className="grid place-items-center w-16 h-11 rounded-[10px] shrink-0" style={{ background: gradientOf(p) }}>
+            <span className={`grid place-items-center ${MEDIA.thumb} shrink-0`} style={{ background: gradientOf(p) }}>
               <ProjectArt icon={p.icon} size={22} />
             </span>
           ),

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import FormSheet from "./FormSheet";
 import ResourceList from "./ResourceList";
+import { MEDIA } from "./tokens";
 import { BilingualInput, Field, ImagePicker, PdfPicker, TextInput, Toggle, linkEn, useCloseForm, useToast } from "./fields";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import { saveAchievement } from "@/app/admin/actions";
@@ -98,7 +99,7 @@ export default function AchievementsManager({ achievements, startNew = false }) 
           subtitle: `${a.provider} · ${a.date}`,
           media: (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={mediaUrl(a.thumb_path ?? a.image_path)} alt="" className="w-16 h-11 rounded-[10px] object-cover bg-surface-2 ring-1 ring-separator shrink-0" />
+            <img src={mediaUrl(a.thumb_path ?? a.image_path)} alt="" className={`${MEDIA.thumb} object-cover bg-surface-2 ring-1 ring-separator shrink-0`} />
           ),
         })}
       />

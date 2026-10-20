@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import FormSheet from "./FormSheet";
 import ResourceList from "./ResourceList";
+import { MEDIA } from "./tokens";
 import { ColorInput, Field, TextInput, Toggle, inputClass, textareaClass, useCloseForm, useToast } from "./fields";
 import TechIcon from "@/components/ui/TechIcon";
 import { saveTechnology, searchIcons } from "@/app/admin/actions";
@@ -101,7 +102,7 @@ export default function TechnologiesManager({ technologies, startNew = false }) 
           title: t.name,
           subtitle: t.featured ? "Tampil di Home" : "Hanya di pengalaman / proyek",
           media: (
-            <span className="grid place-items-center w-11 h-11 rounded-[14px] bg-surface-2 shrink-0 text-fg">
+            <span className={`grid place-items-center ${MEDIA.tile} bg-surface-2 shrink-0 text-fg`}>
               <TechIcon tech={asTech(t)} className="w-6 h-6" />
             </span>
           ),

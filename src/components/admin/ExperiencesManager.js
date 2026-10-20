@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import FormSheet from "./FormSheet";
 import ResourceList from "./ResourceList";
+import { MEDIA } from "./tokens";
 import { BilingualInput, ColorInput, Field, TechPicker, TextInput, Toggle, linkEn, useCloseForm, useToast } from "./fields";
 import { saveExperience } from "@/app/admin/actions";
 
@@ -58,7 +59,7 @@ export default function ExperiencesManager({ experiences, technologies, startNew
         describe={(e) => ({
           title: `${e.role} · ${e.company}`,
           subtitle: e.period?.id,
-          media: <span className="w-2.5 h-11 rounded-full shrink-0" style={{ background: e.tone }} />,
+          media: <span className={`${MEDIA.bar} shrink-0`} style={{ background: e.tone }} />,
         })}
       />
 

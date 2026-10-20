@@ -180,6 +180,30 @@ body {
   }
 }
 
+/* Placeholder skeleton saat konten dimuat: kilau halus bergerak dari kiri ke kanan */
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 100% 50%;
+  }
+  to {
+    background-position: 0% 50%;
+  }
+}
+
+@utility skeleton {
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--fg) 6%, transparent) 25%,
+    color-mix(in srgb, var(--fg) 12%, transparent) 37%,
+    color-mix(in srgb, var(--fg) 6%, transparent) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
 /* Kursor typewriter mengikuti warna aksen */
 .Typewriter__cursor {
   color: var(--accent-fg);

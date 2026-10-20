@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowDown, ArrowUp, Eye, EyeOff, Pencil, Plus, Trash2 } from "lucide-react";
 import AdminPageHeader from "./AdminPageHeader";
+import { LIST, countKey } from "./tokens";
 import { btn } from "@/components/ui/styles";
 import { slideIn, stagger } from "@/lib/motion";
 import { deleteItem, reorderItems, setPublished } from "@/app/admin/actions";
@@ -22,6 +23,15 @@ export default function ResourceList({ table, title, description, items, describ
   const [busyId, setBusyId] = useState(null);
   const list = order ?? items;
   const drafts = canPublish ? items.filter((i) => !i.published).length : 0;
+
+  // Ingat jumlah item → skeleton saat kembali ke halaman ini menampilkan jumlah baris yang sama
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(countKey(table), String(items.length));
+    } catch {
+      // sessionStorage tidak tersedia (mode privat) — skeleton memakai jumlah bawaan
+    }
+  }, [table, items.length]);
 
   const move = async (index, delta) => {
     const next = [...list];
@@ -74,7 +84,7 @@ export default function ResourceList({ table, title, description, items, describ
           </button>
         </div>
       ) : (
-        <motion.ol variants={stagger(0.04, 0.15)} initial="hidden" animate="visible" className="card p-1.5 md:p-2 space-y-0.5">
+        <motion.ol variants={stagger(0.04, 0.15)} initial="hidden" animate="visible" className={LIST.card}>
           {list.map((item, i) => {
             const d = describe(item);
             const hidden = canPublish && !item.published;
@@ -82,7 +92,7 @@ export default function ResourceList({ table, title, description, items, describ
               <motion.li
                 key={item.id}
                 variants={slideIn}
-                className={`group flex items-center gap-2 md:gap-3 pl-1 pr-1.5 md:pr-2 py-1.5 rounded-[1.15rem] transition-colors hover:bg-surface-2/70 ${
+                className={`group ${LIST.row} transition-colors hover:bg-surface-2/70 ${
                   busyId === item.id ? "opacity-50 pointer-events-none" : ""
                 }`}
               >
