@@ -9,14 +9,18 @@ const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 // Vercel Web Analytics & Speed Insights di produksi dimuat & mengirim data lewat origin sendiri
 // (/_vercel/insights/*, /_vercel/speed-insights/*) → cukup 'self'. Hanya mode dev yang memuat
 // skrip debug-nya dari va.vercel-scripts.com.
+// Cloudflare Turnstile (anti-spam form kontak): api.js dari challenges.cloudflare.com (script-src) yang
+// membuat iframe tantangan dari origin yang sama (frame-src). Semua koneksi ke Cloudflare dilakukan
+// dari dalam iframe itu (CSP milik Cloudflare), jadi connect-src halaman tidak perlu ditambah.
+const TURNSTILE = "https://challenges.cloudflare.com";
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval' https://va.vercel-scripts.com" : ""}`,
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' ${TURNSTILE}${isDev ? " 'unsafe-eval' https://va.vercel-scripts.com" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${supabase}`,
   "font-src 'self' data:",
   `connect-src 'self' ${supabase}${isDev ? " ws: wss:" : ""}`,
-  `frame-src ${EMBED_ORIGINS.join(" ")}`,
+  `frame-src ${[...EMBED_ORIGINS, TURNSTILE].join(" ")}`,
   "media-src 'self' blob:",
   "worker-src 'self' blob:",
   "object-src 'none'",

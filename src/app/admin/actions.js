@@ -398,3 +398,45 @@ export async function reorderItems(table, ids) {
     refreshSite();
   });
 }
+
+// -----------------------------------------------------------------------------
+// Pesan dari form kontak (tabel contact_messages): tandai dibaca / belum, hapus.
+// Admin hanya boleh mengubah kolom read_at (dibatasi juga di database).
+// -----------------------------------------------------------------------------
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function messageId(id) {
+  if (typeof id !== "string" || !UUID.test(id)) throw new Error("Pesan tidak dikenal.");
+  return id;
+}
+
+// Badge jumlah belum dibaca ada di layout panel → perbarui seluruh panel
+const refreshInbox = () => revalidatePath("/admin", "layout");
+
+export async function setMessageRead(id, read) {
+  return run(async (supabase) => {
+    const rows = check(
+      await supabase
+        .from("contact_messages")
+        .update({ read_at: read ? new Date().toISOString() : null })
+        .eq("id", messageId(id))
+        .select("id")
+    );
+    if (!rows.length) throw new Error("Pesan tidak ditemukan (mungkin sudah dihapus).");
+    refreshInbox();
+  });
+}
+
+export async function markAllMessagesRead() {
+  return run(async (supabase) => {
+    check(await supabase.from("contact_messages").update({ read_at: new Date().toISOString() }).is("read_at", null));
+    refreshInbox();
+  });
+}
+
+export async function deleteMessage(id) {
+  return run(async (supabase) => {
+    check(await supabase.from("contact_messages").delete().eq("id", messageId(id)));
+    refreshInbox();
+  });
+}

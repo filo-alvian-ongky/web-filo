@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowUpRight, ChevronRight, Clock3, Plus } from "lucide-react";
+import { ArrowUpRight, ChevronRight, Clock3, Inbox, Plus } from "lucide-react";
 import AdminPageHeader from "./AdminPageHeader";
+import { Avatar } from "./MessagesManager";
 import { ADMIN_NAV } from "./nav";
 import PreviewButton from "./PreviewButton";
+import { timeAgo } from "./time";
 import { DASHBOARD } from "./tokens";
 import Card from "@/components/Card";
 import CountUp from "@/components/ui/CountUp";
@@ -13,21 +15,6 @@ import { btn } from "@/components/ui/styles";
 import { slideIn, stagger } from "@/lib/motion";
 
 const NAV = Object.fromEntries(ADMIN_NAV.map((n) => [n.href, n]));
-const rtf = new Intl.RelativeTimeFormat("id", { numeric: "auto" });
-
-function timeAgo(iso) {
-  const seconds = (new Date(iso).getTime() - Date.now()) / 1000;
-  const units = [
-    ["year", 31536000],
-    ["month", 2592000],
-    ["week", 604800],
-    ["day", 86400],
-    ["hour", 3600],
-    ["minute", 60],
-  ];
-  for (const [unit, size] of units) if (Math.abs(seconds) >= size) return rtf.format(Math.round(seconds / size), unit);
-  return "baru saja";
-}
 
 // Ikon kotak berwarna ala app icon One UI
 const Tile = ({ tone, icon: Icon, size = "w-11 h-11", iconSize = 20 }) => (
@@ -36,7 +23,60 @@ const Tile = ({ tone, icon: Icon, size = "w-11 h-11", iconSize = 20 }) => (
   </span>
 );
 
-export default function Dashboard({ greeting, stats, activity, setupError }) {
+/** Pesan dari form kontak: jumlah belum dibaca + 3 pesan terbaru (yang belum dibaca ditebalkan) */
+function InboxWidget({ inbox }) {
+  const nav = NAV["/admin/messages"];
+  return (
+    <Card className={DASHBOARD.inbox}>
+      <Link href={nav.href} className={`group ${DASHBOARD.inboxHead} rounded-[1.1rem]`}>
+        <Tile tone={nav.tone} icon={Inbox} />
+        <span className="flex-1 min-w-0">
+          <span className="block text-lg font-bold text-fg leading-tight">Pesan belum dibaca</span>
+          <span className="block text-sm text-fg-2">
+            {inbox.unread ? `${inbox.unread} pesan baru dari form kontak` : inbox.latest.length ? "Semua pesan sudah dibaca" : "Belum ada pesan masuk"}
+          </span>
+        </span>
+        {inbox.unread > 0 && (
+          <span className="grid place-items-center min-w-8 h-8 px-2.5 rounded-full bg-[#e5484d] text-white text-sm font-bold tabular-nums">
+            <CountUp value={inbox.unread} />
+          </span>
+        )}
+        <ChevronRight size={18} className="text-fg-3 transition-transform group-hover:translate-x-0.5" />
+      </Link>
+      {inbox.latest.length > 0 && (
+        <motion.ul variants={stagger(0.05, 0.2)} initial="hidden" animate="visible">
+          {inbox.latest.map((m) => (
+            <motion.li key={m.id} variants={slideIn}>
+              <Link href={`${nav.href}?id=${m.id}`} className={`group ${DASHBOARD.row} transition-colors hover:bg-surface-2 active:bg-surface-3`}>
+                <Avatar name={m.name} className="w-9 h-9 rounded-full text-sm" />
+                <span className="flex-1 min-w-0">
+                  <span className="flex items-center gap-2">
+                    <span className={`truncate ${m.read ? "font-semibold text-fg-2" : "font-bold text-fg"}`}>{m.name}</span>
+                    {!m.read && (
+                      <>
+                        <span aria-hidden className="shrink-0 w-2 h-2 rounded-full bg-accent" />
+                        <span className="sr-only">(belum dibaca)</span>
+                      </>
+                    )}
+                  </span>
+                  <span className="block text-sm text-fg-2 truncate">
+                    {m.subject ? `${m.subject} · ` : ""}
+                    {m.preview}
+                  </span>
+                </span>
+                <span suppressHydrationWarning className="shrink-0 text-xs text-fg-3">
+                  {timeAgo(m.createdAt)}
+                </span>
+              </Link>
+            </motion.li>
+          ))}
+        </motion.ul>
+      )}
+    </Card>
+  );
+}
+
+export default function Dashboard({ greeting, stats, inbox, activity, setupError }) {
   const empty = !setupError && stats.every((s) => !s.count);
   const drafts = stats.reduce((n, s) => n + s.drafts, 0);
 
@@ -96,6 +136,8 @@ export default function Dashboard({ greeting, stats, activity, setupError }) {
           );
         })}
       </div>
+
+      {inbox && <InboxWidget inbox={inbox} />}
 
       <div className={DASHBOARD.lower}>
         {/* Aksi cepat */}

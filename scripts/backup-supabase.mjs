@@ -23,7 +23,7 @@ if (!url || !key) {
 const supabase = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 const BUCKET = "media";
 // Urutan = urutan pemulihan (tabel induk dulu, baru tabel relasi)
-const TABLES = ["technologies", "experiences", "achievements", "projects", "experience_technologies", "project_technologies", "site_settings", "admins"];
+const TABLES = ["technologies", "experiences", "achievements", "projects", "experience_technologies", "project_technologies", "site_settings", "admins", "contact_messages"];
 const PAGE = 1000;
 
 const pad = (n) => String(n).padStart(2, "0");

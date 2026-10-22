@@ -24,9 +24,30 @@ function greeting() {
   return "Selamat malam";
 }
 
+// Widget pesan: jumlah belum dibaca + 3 pesan terbaru. Tabel belum dibuat (contact.sql) → widget disembunyikan.
+async function loadInbox(supabase) {
+  const [unread, latest] = await Promise.all([
+    supabase.from("contact_messages").select("id", { count: "exact", head: true }).is("read_at", null),
+    supabase.from("contact_messages").select("id, name, subject, message, created_at, read_at").order("created_at", { ascending: false }).limit(3),
+  ]);
+  if (latest.error) return null;
+  return {
+    unread: unread.count ?? 0,
+    latest: latest.data.map((m) => ({
+      id: m.id,
+      name: m.name,
+      subject: m.subject,
+      preview: m.message.replace(/\s+/g, " ").slice(0, 120),
+      createdAt: m.created_at,
+      read: Boolean(m.read_at),
+    })),
+  };
+}
+
 export default async function Page() {
   const { supabase } = await getAdminSession();
   const sections = ADMIN_NAV.filter((n) => n.table);
+  const inboxPromise = loadInbox(supabase);
 
   const stats = await Promise.all(
     sections.map(async (n) => {
@@ -63,6 +84,7 @@ export default async function Page() {
     <Dashboard
       greeting={`${greeting()}, ${profile.firstName}`}
       stats={stats.map(({ recent, ...s }) => s)}
+      inbox={await inboxPromise}
       activity={activity}
       setupError={stats.find((s) => s.error)?.error ?? null}
     />

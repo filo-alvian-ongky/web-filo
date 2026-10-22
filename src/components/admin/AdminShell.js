@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ExternalLink, Globe, LogOut, Plus } from "lucide-react";
+import { ExternalLink, Globe, Inbox, LogOut, Plus } from "lucide-react";
 import { ADMIN_NAV, activeAdminNav } from "./nav";
 import PreviewButton from "./PreviewButton";
 import BrandLogo from "@/components/ui/BrandLogo";
@@ -12,6 +12,18 @@ import { ThemeToggle } from "@/components/Navbar";
 import { iconBtn } from "@/components/ui/styles";
 import { useSlidingPill } from "@/components/ui/useSlidingPill";
 import { getBrowserSupabase } from "@/lib/supabase/browser";
+
+// Jumlah pesan belum dibaca (bulatan merah ala badge aplikasi). 99+ bila lebih.
+function UnreadBadge({ count, className = "" }) {
+  if (!count) return null;
+  return (
+    <span className={`inline-grid place-items-center min-w-5 h-5 px-1.5 rounded-full bg-[#e5484d] text-white text-[11px] font-bold leading-none tabular-nums ${className}`}>
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
+
+const unreadLabel = (count) => (count ? `, ${count} belum dibaca` : "");
 
 function useSignOut() {
   const router = useRouter();
@@ -23,7 +35,7 @@ function useSignOut() {
 }
 
 // Desktop: sidebar kaca melayang (gaya navbar website), indikator pil bergeser vertikal
-function Sidebar({ email, active }) {
+function Sidebar({ email, active, unread }) {
   const pill = useSlidingPill(active.href);
   const signOut = useSignOut();
   return (
@@ -51,11 +63,13 @@ function Sidebar({ email, active }) {
                   ref={pill.register(item.href)}
                   href={item.href}
                   aria-current={on ? "page" : undefined}
+                  aria-label={item.badge && unread ? `${item.label}${unreadLabel(unread)}` : undefined}
                   className={`relative flex items-center gap-3 h-11 px-3.5 rounded-2xl text-[15px] font-semibold transition-colors ${
                     on ? "text-accent-fg" : "text-fg-2 hover:text-fg"
                   }`}
                 >
                   <Icon size={19} strokeWidth={on ? 2.4 : 2} /> {item.label}
+                  {item.badge && <UnreadBadge count={unread} className="ml-auto" />}
                 </Link>
               </li>
             );
@@ -98,8 +112,8 @@ function Sidebar({ email, active }) {
   );
 }
 
-// Ponsel: top bar kaca ala iOS dengan nama menu aktif
-function MobileHeader({ active }) {
+// Ponsel: top bar kaca ala iOS dengan nama menu aktif + tombol inbox (Pesan tidak muat di tab bar)
+function MobileHeader({ active, unread }) {
   const signOut = useSignOut();
   return (
     <header className="md:hidden sticky top-0 z-40 bg-glass backdrop-blur-xl backdrop-saturate-150 border-b border-separator" style={{ paddingTop: "env(safe-area-inset-top)" }}>
@@ -109,6 +123,15 @@ function MobileHeader({ active }) {
           <span className="text-[17px] font-bold tracking-tight text-fg truncate">{active.label}</span>
         </Link>
         <div className="flex items-center">
+          <Link
+            href="/admin/messages"
+            aria-current={active.href === "/admin/messages" ? "page" : undefined}
+            aria-label={`Pesan${unreadLabel(unread)}`}
+            className={`${iconBtn} relative ${active.href === "/admin/messages" ? "text-accent-fg bg-accent-soft" : ""}`}
+          >
+            <Inbox size={19} />
+            <UnreadBadge count={unread} className="absolute -top-0.5 -right-0.5 ring-2 ring-surface" />
+          </Link>
           <ThemeToggle />
           <button onClick={signOut} className={iconBtn} aria-label="Keluar" title="Keluar">
             <LogOut size={19} />
@@ -120,6 +143,8 @@ function MobileHeader({ active }) {
 }
 
 const LABEL_BREATHING = 10;
+
+const TAB_NAV = ADMIN_NAV.filter((n) => n.tab !== false);
 
 // Ponsel: tab bar melayang (sama seperti website) + tombol bundar aksi utama
 function MobileTabBar({ active }) {
@@ -155,7 +180,7 @@ function MobileTabBar({ active }) {
       <div className="flex items-center gap-2.5">
         <ul ref={listRef} className="relative pointer-events-auto flex-1 flex items-center h-16 px-1.5 rounded-full glass shadow-float">
           <motion.span aria-hidden style={pill.style} className="absolute top-0 left-0 rounded-full bg-accent-soft" />
-          {ADMIN_NAV.map((item, i) => {
+          {TAB_NAV.map((item, i) => {
             const on = item.href === active.href;
             const Icon = item.icon;
             return (
@@ -206,13 +231,13 @@ function MobileTabBar({ active }) {
   );
 }
 
-export default function AdminShell({ email, children }) {
+export default function AdminShell({ email, unread = 0, children }) {
   const pathname = usePathname();
   const active = activeAdminNav(pathname);
   return (
     <div className="min-h-svh">
-      <Sidebar email={email} active={active} />
-      <MobileHeader active={active} />
+      <Sidebar email={email} active={active} unread={unread} />
+      <MobileHeader active={active} unread={unread} />
       <main className="md:pl-[18.5rem] px-4 md:pr-8 pt-6 md:pt-10 pb-36 md:pb-14">
         <div className="mx-auto max-w-5xl">{children}</div>
       </main>

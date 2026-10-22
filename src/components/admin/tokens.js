@@ -30,6 +30,17 @@ export const DASHBOARD = {
   activity: "lg:col-span-3 p-2 md:p-3",
   cardTitle: "px-3 pt-3 pb-2",
   row: "flex items-center gap-3 px-3 py-2.5 rounded-[1.1rem]",
+  // Widget pesan belum dibaca (di antara widget jumlah konten dan kartu bawah)
+  inbox: "mt-3 md:mt-4 p-2 md:p-3",
+  inboxHead: "flex items-center gap-3 px-3 pt-3 pb-2",
+};
+
+// Halaman Pesan (inbox form kontak): filter Semua / Belum dibaca + daftar pesan
+export const MESSAGES = {
+  toolbar: "flex items-center justify-between gap-3 mb-3 px-1",
+  // Titik biru "belum dibaca" di kiri avatar (tempatnya tetap ada walau sudah dibaca agar baris sejajar)
+  dot: "w-2 h-2 shrink-0 rounded-full",
+  avatar: "w-11 h-11 rounded-full",
 };
 
 // Halaman Pengaturan Website: satu kartu per bagian (hero, sorotan, bidang fokus, profil CV)

@@ -1,10 +1,12 @@
-import { Award, BriefcaseBusiness, Cpu, LayoutDashboard, LayoutGrid, SlidersHorizontal } from "lucide-react";
+import { Award, BriefcaseBusiness, Cpu, Inbox, LayoutDashboard, LayoutGrid, SlidersHorizontal } from "lucide-react";
 
 // Menu CMS (modul biasa, bukan "use client", agar bisa dipakai Server & Client Component).
 // tone = warna aksen widget dasbor (sama dengan palet widget sorotan di Home)
 // short = label tab bar ponsel (bila label lengkap terlalu panjang)
+// badge = tampilkan jumlah pesan belum dibaca; tab: false = tidak di tab bar ponsel (diganti tombol di top bar)
 export const ADMIN_NAV = [
   { href: "/admin", label: "Dasbor", icon: LayoutDashboard },
+  { href: "/admin/messages", label: "Pesan", icon: Inbox, tone: "#F43F5E", badge: true, tab: false },
   { href: "/admin/experiences", label: "Pengalaman", noun: "pengalaman", icon: BriefcaseBusiness, table: "experiences", tone: "#0A6CF5" },
   { href: "/admin/achievements", label: "Pencapaian", noun: "pencapaian", icon: Award, table: "achievements", tone: "#F59E0B" },
   { href: "/admin/projects", label: "Proyek", noun: "proyek", icon: LayoutGrid, table: "projects", tone: "#8B5CF6" },

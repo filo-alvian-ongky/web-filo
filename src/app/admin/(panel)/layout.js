@@ -8,7 +8,13 @@ import { getAdminSession } from "@/lib/supabase/server";
 // tidak hanya di proxy — jadi tetap aman walau proxy dilewati)
 export default async function PanelLayout({ children }) {
   if (!isSupabaseConfigured) return <SetupNotice />;
-  const { user, isAdmin, mfaVerified } = await getAdminSession();
+  const { supabase, user, isAdmin, mfaVerified } = await getAdminSession();
   if (!user || !isAdmin || !mfaVerified) redirect("/admin/login");
-  return <AdminShell email={user.email}>{children}</AdminShell>;
+  // Badge menu "Pesan". Tabel belum dibuat (contact.sql belum dijalankan) → error diabaikan, badge 0.
+  const { count } = await supabase.from("contact_messages").select("id", { count: "exact", head: true }).is("read_at", null);
+  return (
+    <AdminShell email={user.email} unread={count ?? 0}>
+      {children}
+    </AdminShell>
+  );
 }

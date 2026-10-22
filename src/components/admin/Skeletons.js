@@ -1,7 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { DASHBOARD, LIST, MEDIA, MEDIA_OF, PAGE_HEADER, SETTINGS, countKey } from "./tokens";
+import { DASHBOARD, LIST, MEDIA, MEDIA_OF, MESSAGES, PAGE_HEADER, SETTINGS, countKey } from "./tokens";
 
 // Skeleton panel admin. Tata letaknya memakai token yang sama dengan komponen aslinya
 // (tokens.js), jadi saat halaman berpindah, bentuk placeholder = bentuk konten yang akan muncul.
@@ -90,6 +90,40 @@ export function ListSkeleton({ table, fallback = 5, canPublish = true }) {
   );
 }
 
+/** Skeleton inbox Pesan: filter Semua / Belum dibaca + baris pesan (titik, avatar, nama + cuplikan, waktu) */
+export function MessagesSkeleton() {
+  const rows = useRememberedCount("contact_messages", 4);
+  return (
+    <section aria-busy="true" aria-label="Memuat pesan">
+      <HeaderSkeleton actions={[["w-52", true]]} />
+      <div className={MESSAGES.toolbar}>
+        <Bone className="h-10 w-56 rounded-full" />
+      </div>
+      <div className={LIST.card}>
+        {Array.from({ length: rows }, (_, i) => (
+          <div key={i} className={LIST.row}>
+            <div className="flex-1 min-w-0 flex items-center gap-2.5 md:gap-3 pl-1.5 py-1">
+              <span className={MESSAGES.dot} />
+              <Bone className={`${MESSAGES.avatar} shrink-0`} />
+              <div className="flex-1 min-w-0 py-1 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Bone className={`h-4 rounded-full ${SUB_WIDTHS[i % SUB_WIDTHS.length]}`} />
+                  <Bone className="ml-auto h-3 w-16 rounded-full" />
+                </div>
+                <Bone className={`h-3 rounded-full ${WIDTHS[i % WIDTHS.length]}`} />
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Bone className="hidden sm:block w-8 h-8 rounded-full" />
+              <Bone className="w-8 h-8 rounded-full" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 /** Kartu bagian Pengaturan Website: judul + isi (baris teks atau baris daftar) */
 function SettingsCardSkeleton({ rows, list = false }) {
   return (
@@ -167,6 +201,24 @@ export function DashboardSkeleton() {
             <Bone className={MEDIA.tile} />
             <Bone className="mt-5 h-8 md:h-10 w-12 rounded-xl" />
             <Bone className="mt-2.5 h-3.5 w-20 rounded-full" />
+          </div>
+        ))}
+      </div>
+      <div className={`card ${DASHBOARD.inbox}`}>
+        <div className={DASHBOARD.inboxHead}>
+          <Bone className={`${MEDIA.tile} shrink-0`} />
+          <div className="flex-1 space-y-2">
+            <Bone className="h-5 w-40 rounded-full" />
+            <Bone className="h-3 w-24 rounded-full" />
+          </div>
+        </div>
+        {Array.from({ length: 3 }, (_, i) => (
+          <div key={i} className={DASHBOARD.row}>
+            <Bone className="w-9 h-9 rounded-full shrink-0" />
+            <div className="flex-1 space-y-2">
+              <Bone className={`h-4 rounded-full ${SUB_WIDTHS[(i + 1) % SUB_WIDTHS.length]}`} />
+              <Bone className={`h-3 rounded-full ${WIDTHS[(i + 3) % WIDTHS.length]}`} />
+            </div>
           </div>
         ))}
       </div>
