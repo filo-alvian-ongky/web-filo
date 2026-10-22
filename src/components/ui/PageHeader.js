@@ -7,19 +7,15 @@ import { fadeUp, stagger } from "@/lib/motion";
 import RevealWords from "./RevealWords";
 
 /**
- * Header halaman ala One UI "expanded app bar":
- * judul besar di area atas yang memudar saat digulir, lalu judul kecilnya
- * muncul di navbar (pola large title iOS).
+ * Begitu judul besar (`ref`) tergulir ke balik top bar, judulnya dipasang sebagai judul kecil
+ * di navbar (pola large title iOS). Dipakai header halaman website & CMS.
  */
-export default function PageHeader({ eyebrow, title, description, children }) {
-  const titleRef = useRef(null);
+export function useCompactTitle(title) {
+  const ref = useRef(null);
   const { setCompactTitle } = useUI();
-  const { scrollY } = useScroll();
-  const opacity = useTransform(scrollY, [0, 220], [1, 0]);
-  const scale = useTransform(scrollY, [0, 220], [1, 0.95]);
 
   useEffect(() => {
-    const el = titleRef.current;
+    const el = ref.current;
     if (!el) return;
     const io = new IntersectionObserver(([entry]) => setCompactTitle(entry.isIntersecting ? null : title), {
       rootMargin: "-72px 0px 0px 0px",
@@ -30,6 +26,20 @@ export default function PageHeader({ eyebrow, title, description, children }) {
       setCompactTitle(null);
     };
   }, [title, setCompactTitle]);
+
+  return ref;
+}
+
+/**
+ * Header halaman ala One UI "expanded app bar":
+ * judul besar di area atas yang memudar saat digulir, lalu judul kecilnya
+ * muncul di navbar (pola large title iOS).
+ */
+export default function PageHeader({ eyebrow, title, description, children }) {
+  const titleRef = useCompactTitle(title);
+  const { scrollY } = useScroll();
+  const opacity = useTransform(scrollY, [0, 220], [1, 0]);
+  const scale = useTransform(scrollY, [0, 220], [1, 0.95]);
 
   return (
     <motion.header style={{ opacity, scale }} className="px-4 md:px-6 origin-bottom">

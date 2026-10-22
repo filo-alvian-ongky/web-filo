@@ -14,30 +14,46 @@ import { useSlidingPill } from "./ui/useSlidingPill";
 
 export const isActivePath = (pathname, path) => (path === "/" ? pathname === "/" : pathname?.startsWith(path));
 
+const SWAP = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -12 }, transition: { duration: 0.22 } };
+
 /**
- * Logo + teks di sampingnya. Bila `title` diisi (halaman selain Beranda yang sudah digulir),
- * teks "FiloAlvian.com" berganti menjadi nama halaman dengan animasi geser ala iOS.
+ * Teks di samping logo: `brand` berganti menjadi `title` (judul halaman yang sudah tergulir)
+ * dengan animasi geser ala iOS. Dipakai navbar website & top bar CMS.
  */
+export function SwapTitle({ brand, title = null, className = "" }) {
+  return (
+    // Kedua teks ditumpuk di sel grid yang sama agar bisa bertukar tanpa lompatan layout
+    <span className={`grid items-center overflow-hidden py-0.5 text-[17px] font-bold tracking-tight text-fg ${className}`}>
+      <AnimatePresence initial={false}>
+        {title ? (
+          <motion.span key={title} {...SWAP} className="[grid-area:1/1] truncate">
+            {title}
+          </motion.span>
+        ) : (
+          <motion.span key="brand" {...SWAP} className="[grid-area:1/1] truncate">
+            {brand}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </span>
+  );
+}
+
+/** Logo + teks di sampingnya; `title` diisi saat judul halaman selain Beranda sudah digulir */
 export function Logo({ compactUntilLg = false, title = null }) {
   const { t } = useLang();
-  const swap = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -12 }, transition: { duration: 0.22 } };
   return (
     <Link href="/" aria-label={`${profile.domain} — ${t.home}`} className="pressable inline-flex items-center gap-2.5 shrink-0">
       <BrandLogo className="w-9 h-9 text-fg transition-colors" />
-      {/* Kedua teks ditumpuk di sel grid yang sama agar bisa bertukar tanpa lompatan layout */}
-      <span className={`grid items-center overflow-hidden py-0.5 text-[17px] font-bold tracking-tight text-fg ${compactUntilLg ? "hidden lg:grid" : ""}`}>
-        <AnimatePresence initial={false}>
-          {title ? (
-            <motion.span key={title} {...swap} className="[grid-area:1/1] whitespace-nowrap">
-              {title}
-            </motion.span>
-          ) : (
-            <motion.span key="brand" {...swap} className="[grid-area:1/1] whitespace-nowrap">
-              <span className="text-accent-fg">FiloAlvian</span>.com
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </span>
+      <SwapTitle
+        title={title}
+        className={compactUntilLg ? "hidden lg:grid" : ""}
+        brand={
+          <>
+            <span className="text-accent-fg">FiloAlvian</span>.com
+          </>
+        }
+      />
     </Link>
   );
 }

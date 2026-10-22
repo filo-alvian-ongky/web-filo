@@ -8,7 +8,8 @@ import { ExternalLink, Globe, Inbox, LogOut, Plus } from "lucide-react";
 import { ADMIN_NAV, activeAdminNav } from "./nav";
 import PreviewButton from "./PreviewButton";
 import BrandLogo from "@/components/ui/BrandLogo";
-import { ThemeToggle } from "@/components/Navbar";
+import { SwapTitle, ThemeToggle } from "@/components/Navbar";
+import { useUI } from "@/components/providers/UIProvider";
 import { iconBtn } from "@/components/ui/styles";
 import { useSlidingPill } from "@/components/ui/useSlidingPill";
 import { getBrowserSupabase } from "@/lib/supabase/browser";
@@ -112,15 +113,25 @@ function Sidebar({ email, active, unread }) {
   );
 }
 
-// Ponsel: top bar kaca ala iOS dengan nama menu aktif + tombol inbox (Pesan tidak muat di tab bar)
+// Ponsel: top bar kaca ala iOS + tombol inbox (Pesan tidak muat di tab bar). Teks di samping logo
+// "FiloCMS", berganti jadi judul halaman saat judul besarnya tergulir (sama seperti navbar website).
 function MobileHeader({ active, unread }) {
   const signOut = useSignOut();
+  const { compactTitle } = useUI();
   return (
     <header className="md:hidden sticky top-0 z-40 bg-glass backdrop-blur-xl backdrop-saturate-150 border-b border-separator" style={{ paddingTop: "env(safe-area-inset-top)" }}>
       <div className="h-14 pl-4 pr-2 flex items-center justify-between">
-        <Link href="/admin" className="pressable flex items-center gap-2.5 min-w-0">
-          <BrandLogo title="Logo FiloAlvian.com" className="w-9 h-9 text-fg" />
-          <span className="text-[17px] font-bold tracking-tight text-fg truncate">{active.label}</span>
+        <Link href="/admin" aria-label="FiloCMS — Dasbor" className="pressable flex items-center gap-2.5 min-w-0">
+          <BrandLogo className="w-9 h-9 text-fg" />
+          <SwapTitle
+            title={compactTitle}
+            className="min-w-0"
+            brand={
+              <>
+                <span className="text-accent-fg">Filo</span>CMS
+              </>
+            }
+          />
         </Link>
         <div className="flex items-center">
           <Link
