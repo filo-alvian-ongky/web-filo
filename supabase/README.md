@@ -101,7 +101,8 @@ Membaca / menandai / menghapus pesan hanya untuk admin yang sudah 2FA. Batas glo
    (permission *Sending access*) → salin ke `RESEND_API_KEY`. Pengirim bawaan `onboarding@resend.dev` hanya bisa mengirim
    ke email pemilik akun Resend — karena itu daftar dengan email tujuan di atas. Agar pengirimnya dari domain sendiri:
    Resend → **Domains** → tambah `filoalvian.com` → salin record DNS ke Hostinger → setelah *Verified*, isi
-   `CONTACT_FROM_EMAIL` (mis. `FiloAlvian.com <halo@filoalvian.com>`).
+   `CONTACT_FROM_EMAIL` (mis. `FiloAlvian.com <halo@filoalvian.com>`). Cukup record kirim (TXT `resend._domainkey`,
+   CNAME `rsend` & `send`, TXT `_dmarc`); lewati MX `@` milik *Enable Receiving* agar tidak mengambil alih email masuk domain.
 5. **Vercel** → Project **web-filo** → Settings → Environment Variables → tambahkan `CONTACT_FORM_SECRET`,
    `TURNSTILE_SECRET_KEY`, `RESEND_API_KEY` (tipe **Sensitive**/Secret) dan `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
    (+ `CONTACT_FROM_EMAIL` bila dipakai) → **Redeploy**. `NEXT_PUBLIC_…` dibaca saat build, jadi redeploy wajib.
