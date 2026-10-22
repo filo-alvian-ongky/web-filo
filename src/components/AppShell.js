@@ -32,6 +32,9 @@ function DocumentTitle() {
     const title = TITLES[pathname]?.[lang];
     if (!title) return;
     const sync = () => {
+      // Observer halaman lama masih aktif sesaat setelah pindah halaman (mis. ke /achievements/[id]):
+      // jangan timpa judul halaman baru
+      if (window.location.pathname !== pathname) return;
       if (document.title !== title) document.title = title;
     };
     sync();

@@ -1,7 +1,7 @@
 // Mengubah baris database (atau data cadangan) menjadi bentuk yang dipakai komponen tampilan.
 // Semua hasilnya objek biasa (bisa dikirim dari Server Component ke Client Component).
 
-import { mediaUrl } from "../supabase/config";
+import { mediaUrl, thumbPathOf } from "../supabase/config";
 import { safeEmbedUrl, safeHttpUrl } from "../embeds.mjs";
 import { cvProfile, focusAreas, focusIntro, hero, highlights } from "../data";
 
@@ -44,10 +44,17 @@ export function experienceView(row, stack) {
   };
 }
 
+// Konten lokal (tanpa id database): id dari nama file gambar, aman dipakai di URL /achievements/[id]
+const localId = (path) =>
+  String(path ?? "")
+    .replace(/^.*\/|\.\w+$/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-");
+
 export function achievementView(row) {
   const image = mediaUrl(row.image_path);
   return {
-    id: row.id ?? row.image_path,
+    id: row.id ?? localId(row.image_path),
     title: bilingual(row.title),
     provider: row.provider,
     date: row.date,
@@ -57,8 +64,20 @@ export function achievementView(row) {
     file: mediaUrl(row.pdf_path),
     // Lapisan pengaman kedua: link non-http(s) (mis. javascript:) tidak pernah sampai ke halaman
     link: safeHttpUrl(row.link_url),
+    // Markdown halaman detail
+    description: bilingual(row.description),
+    updatedAt: row.updated_at ?? null,
   };
 }
+
+// Galeri proyek: path gambar penuh → { image, thumb } (thumbnail = pasangan "-thumb" bila ada)
+const galleryView = (paths) =>
+  (Array.isArray(paths) ? paths : [])
+    .map((path) => {
+      const image = mediaUrl(path);
+      return image && { image, thumb: mediaUrl(thumbPathOf(path)) ?? image };
+    })
+    .filter(Boolean);
 
 export function projectView(row, stack) {
   const cover = mediaUrl(row.cover_path);
@@ -75,6 +94,12 @@ export function projectView(row, stack) {
     cover,
     coverThumb: mediaUrl(row.thumb_path) ?? cover,
     stack: stack ?? stackFromJoin(row.project_technologies),
+    // Halaman detail (case study); story = markdown
+    role: bilingual(row.role),
+    period: bilingual(row.period),
+    story: bilingual(row.story),
+    gallery: galleryView(row.gallery),
+    updatedAt: row.updated_at ?? null,
   };
 }
 

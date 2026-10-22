@@ -5,7 +5,21 @@ import { useRouter } from "next/navigation";
 import FormSheet from "./FormSheet";
 import ResourceList from "./ResourceList";
 import { MEDIA } from "./tokens";
-import { BilingualInput, ColorInput, Field, ImagePicker, TechPicker, TextInput, Toggle, linkEn, useCloseForm, useToast } from "./fields";
+import {
+  BilingualInput,
+  ColorInput,
+  Field,
+  GalleryPicker,
+  ImagePicker,
+  MarkdownInput,
+  TechPicker,
+  TextInput,
+  Toggle,
+  galleryItems,
+  linkEn,
+  useCloseForm,
+  useToast,
+} from "./fields";
 import ProjectArt, { PROJECT_ICONS } from "@/components/ui/ProjectArt";
 import { saveProject } from "@/app/admin/actions";
 import { mediaUrl } from "@/lib/supabase/config";
@@ -23,6 +37,10 @@ const empty = () => ({
   icon: "sparkles",
   cover_path: null,
   thumb_path: null,
+  role: { id: "", en: "" },
+  period: { id: "", en: "" },
+  story: { id: "", en: "" },
+  gallery: [],
   published: true,
   technologyIds: [],
 });
@@ -30,10 +48,18 @@ const empty = () => ({
 const fromRow = (row) => ({
   ...row,
   summary: linkEn(row.summary),
+  role: linkEn(row.role),
+  period: linkEn(row.period),
+  story: linkEn(row.story),
   embed_url: row.embed_url ?? "",
   link_url: row.link_url ?? "",
   technologyIds: [...(row.project_technologies ?? [])].sort((a, b) => a.sort_order - b.sort_order).map((j) => j.technology_id),
 });
+
+// Kerangka awal cerita proyek (placeholder): masalah → peran → proses → hasil
+const STORY_TEMPLATE = "## Masalah\nApa yang ingin diselesaikan?\n\n## Peran Saya\n…\n\n## Proses\n- …\n\n## Hasil\n…";
+
+const MAX_GALLERY = 8;
 
 const gradientOf = (p) => `linear-gradient(135deg, ${p.gradient_from} 0%, ${p.gradient_to} 100%)`;
 
@@ -44,6 +70,8 @@ export default function ProjectsManager({ projects, technologies, startNew = fal
   const closeForm = useCloseForm(setForm, startNew);
   const [tagsText, setTagsText] = useState("");
   const [coverFile, setCoverFile] = useState(null);
+  // Galeri form: { key, path } tersimpan / { key, file } baru
+  const [gallery, setGallery] = useState([]);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState(null);
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
@@ -52,6 +80,7 @@ export default function ProjectsManager({ projects, technologies, startNew = fal
     setForm(value);
     setTagsText(value.tags.join(", "));
     setCoverFile(null);
+    setGallery(galleryItems(value.gallery));
   };
 
   const submit = async () => {
@@ -66,6 +95,21 @@ export default function ProjectsManager({ projects, technologies, startNew = fal
         uploaded.push(image_path, thumb_path);
         removedPaths.push(form.cover_path, form.thumb_path);
         Object.assign(values, { cover_path: image_path, thumb_path });
+      }
+      // Gambar galeri baru di-upload berurutan; galeri lama yang dihapus dibuang server saat disimpan
+      const fresh = gallery.filter((g) => g.file).length;
+      let done = 0;
+      values.gallery = [];
+      for (const item of gallery) {
+        if (item.path) {
+          values.gallery.push(item.path);
+          continue;
+        }
+        done += 1;
+        setStatus(`Mengompres & meng-upload galeri ${done}/${fresh}…`);
+        const { image_path, thumb_path } = await uploadImageWithThumb("projects", item.file, `${form.slug || form.title || "proyek"}-galeri`);
+        uploaded.push(image_path, thumb_path);
+        values.gallery.push(image_path);
       }
       setStatus("Menyimpan…");
       const res = await saveProject({ ...values, removedPaths: removedPaths.filter(Boolean) });
@@ -122,6 +166,9 @@ export default function ProjectsManager({ projects, technologies, startNew = fal
             </div>
 
             <BilingualInput label="Ringkasan" value={form.summary} onChange={(summary) => set({ summary })} multiline required />
+
+            <BilingualInput label="Peran (opsional)" hint="Tampil di halaman detail, mis. Team Leader & UI/UX Designer." value={form.role} onChange={(role) => set({ role })} />
+            <BilingualInput label="Periode (opsional)" hint="mis. Sep 2025 — Jan 2026." value={form.period} onChange={(period) => set({ period })} />
 
             <Field label="Tag kategori" hint="Pisahkan dengan koma, mis. AI & Mobile, Machine Learning.">
               <TextInput value={tagsText} onChange={setTagsText} />
@@ -181,6 +228,18 @@ export default function ProjectsManager({ projects, technologies, startNew = fal
                   />
                 </div>
               </div>
+            </Field>
+
+            <MarkdownInput
+              label="Cerita proyek (halaman detail)"
+              hint="Saran alur: Masalah → Peran → Proses → Hasil. Format: ## Subjudul, **tebal**, *miring*, - daftar, [teks](https://…). HTML tidak didukung."
+              value={form.story}
+              onChange={(story) => set({ story })}
+              placeholder={STORY_TEMPLATE}
+            />
+
+            <Field label="Galeri (opsional)" hint={`Maks. ${MAX_GALLERY} gambar, otomatis dikompres ke WebP + thumbnail saat disimpan. Urutan di sini = urutan tampil.`}>
+              <GalleryPicker items={gallery} onChange={setGallery} max={MAX_GALLERY} />
             </Field>
 
             <Toggle label="Tampilkan di website" checked={form.published} onChange={(published) => set({ published })} />

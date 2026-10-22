@@ -19,3 +19,12 @@ export function mediaUrl(path) {
   if (/^[a-z]+:/i.test(path) || path.startsWith("//")) return null;
   return `${SUPABASE_URL}/storage/v1/object/public/${MEDIA_BUCKET}/${path}`;
 }
+
+/**
+ * Path thumbnail pasangan gambar yang di-upload CMS ("…-full.webp" → "…-thumb.webp").
+ * Dipakai galeri proyek yang hanya menyimpan path gambar penuh. Path lain → null.
+ */
+export function thumbPathOf(path) {
+  const FULL = /-full(\.[a-z0-9]+)$/i;
+  return typeof path === "string" && FULL.test(path) ? path.replace(FULL, "-thumb$1") : null;
+}

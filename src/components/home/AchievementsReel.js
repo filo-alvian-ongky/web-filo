@@ -18,7 +18,7 @@ function ReelCard({ item, index, progress, scrub }) {
   const imageX = useTransform(progress, [0, 1], ["6%", "-6%"]);
   return (
     <Reveal as="li" className="shrink-0 w-[78vw] max-w-[22rem] md:w-[26rem] md:max-w-none">
-      <Link href="/achievements" className="group card block h-full overflow-hidden">
+      <Link href={`/achievements/${item.id}`} className="group card block h-full overflow-hidden">
         <div className="relative aspect-[1.414] overflow-hidden bg-surface-2">
           {/* Gambar dibuat 16% lebih lebar agar tepinya tidak terlihat saat bergeser */}
           <motion.div style={scrub ? { x: imageX } : undefined} className="absolute inset-y-0 -inset-x-[8%]">

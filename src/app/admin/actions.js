@@ -5,13 +5,13 @@
 
 import { revalidatePath } from "next/cache";
 import { getAdminSession } from "@/lib/supabase/server";
-import { MEDIA_BUCKET } from "@/lib/supabase/config";
+import { MEDIA_BUCKET, thumbPathOf } from "@/lib/supabase/config";
 import { safeEmbedUrl, safeHttpUrl } from "@/lib/embeds.mjs";
 import { FOCUS_ICONS } from "@/components/ui/focusIcons";
 
 const TABLES = ["technologies", "experiences", "achievements", "projects"];
 // Kolom file per tabel (untuk dibersihkan dari storage saat baris dihapus)
-const FILE_COLUMNS = { achievements: ["image_path", "thumb_path", "pdf_path"], projects: ["cover_path", "thumb_path"] };
+const FILE_COLUMNS = { achievements: ["image_path", "thumb_path", "pdf_path"], projects: ["cover_path", "thumb_path", "gallery"] };
 
 async function adminClient() {
   const { supabase, user, isAdmin, mfaVerified } = await getAdminSession();
@@ -35,12 +35,16 @@ const check = ({ error, data }) => {
   return data;
 };
 
-// Perbarui seluruh halaman publik (ISR) + PDF CV + saran pertanyaan Filo AI setelah konten berubah
+// Perbarui seluruh halaman publik (ISR, termasuk halaman detail proyek & pencapaian) + PDF CV +
+// saran pertanyaan Filo AI + sitemap setelah konten berubah
 const refreshSite = () => {
   revalidatePath("/", "layout");
+  revalidatePath("/projects/[slug]", "page");
+  revalidatePath("/achievements/[id]", "page");
   revalidatePath("/cv/id");
   revalidatePath("/cv/en");
   revalidatePath("/api/chat/suggestions");
+  revalidatePath("/sitemap.xml");
 };
 
 const bilingual = (v) => {
@@ -73,6 +77,23 @@ async function removeFiles(supabase, paths) {
   const list = paths.filter((p) => typeof p === "string" && STORAGE_PATH.test(p) && !p.includes(".."));
   if (list.length) await supabase.storage.from(MEDIA_BUCKET).remove(list);
 }
+
+// Gambar galeri + thumbnail pasangannya ("…-full.webp" → "…-thumb.webp")
+const withThumbs = (paths) => paths.flatMap((p) => [p, thumbPathOf(p)]);
+
+const MAX_GALLERY = 8;
+
+/** Galeri proyek: daftar path gambar penuh (urutan = urutan tampil), tiap path harus lolos safePath */
+function galleryField(value) {
+  if (value == null) return [];
+  if (!Array.isArray(value)) throw new Error("Galeri tidak valid.");
+  const paths = [...new Set(value.map((p, i) => safePath(p, `galeri ${i + 1}`)).filter(Boolean))];
+  if (paths.length > MAX_GALLERY) throw new Error(`Galeri maksimal ${MAX_GALLERY} gambar.`);
+  return paths;
+}
+
+// Teks markdown halaman detail (cerita proyek / deskripsi pencapaian)
+const MARKDOWN_MAX = 20000;
 
 async function upsertRow(supabase, table, id, values) {
   const query = id ? supabase.from(table).update(values).eq("id", id) : supabase.from(table).insert({ ...values, sort_order: values.sort_order ?? (await nextOrder(supabase, table)) });
@@ -181,6 +202,7 @@ export async function saveAchievement(input) {
       thumb_path: safePath(input.thumb_path, "thumbnail") ?? image_path,
       pdf_path: safePath(input.pdf_path, "PDF"),
       link_url: optionalLink(input.link_url, "Link verifikasi"),
+      description: bilingualField(input.description, "Deskripsi", { max: MARKDOWN_MAX, required: false }),
       published: Boolean(input.published),
     });
     // File lama yang diganti / dihapus di form
@@ -214,6 +236,9 @@ export async function saveProject(input) {
       throw new Error("Link embed harus https dari Canva, Figma, Google Docs/Slides, YouTube, atau Vimeo.");
     }
     const cover_path = safePath(input.cover_path, "sampul");
+    const gallery = galleryField(input.gallery);
+    // Galeri lama dibaca dari database (bukan dari browser) untuk menentukan file yang dibuang
+    const previous = input.id ? check(await supabase.from("projects").select("gallery").eq("id", input.id).maybeSingle()) : null;
     const id = await upsertRow(supabase, "projects", input.id, {
       slug,
       title,
@@ -226,10 +251,15 @@ export async function saveProject(input) {
       icon: /^[a-z]{2,20}$/.test(input.icon ?? "") ? input.icon : "sparkles",
       cover_path,
       thumb_path: safePath(input.thumb_path, "thumbnail") ?? cover_path,
+      role: bilingualField(input.role, "Peran", { max: 120, required: false }),
+      period: bilingualField(input.period, "Periode", { max: 60, required: false }),
+      story: bilingualField(input.story, "Cerita proyek", { max: MARKDOWN_MAX, required: false }),
+      gallery,
       published: Boolean(input.published),
     });
     await replaceStack(supabase, "project_technologies", "project_id", id, input.technologyIds);
-    await removeFiles(supabase, input.removedPaths ?? []);
+    const dropped = (previous?.gallery ?? []).filter((p) => !gallery.includes(p));
+    await removeFiles(supabase, [...(input.removedPaths ?? []), ...withThumbs(dropped)]);
     refreshSite();
     return { id };
   });
@@ -347,7 +377,7 @@ export async function deleteItem(table, id) {
     const columns = FILE_COLUMNS[table];
     const row = columns ? check(await supabase.from(table).select(columns.join(",")).eq("id", id).single()) : null;
     check(await supabase.from(table).delete().eq("id", id));
-    if (row) await removeFiles(supabase, columns.map((c) => row[c]));
+    if (row) await removeFiles(supabase, columns.flatMap((c) => (Array.isArray(row[c]) ? withThumbs(row[c]) : [row[c]])));
     refreshSite();
   });
 }

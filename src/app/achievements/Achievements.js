@@ -2,13 +2,14 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import { ArrowUpRight, BadgeCheck, Calendar, ChevronRight, FileText } from "lucide-react";
+import { ArrowUpRight, BadgeCheck, Calendar, ChevronRight, FileText, Maximize2 } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
 import SegmentedControl from "../../components/ui/SegmentedControl";
 import Reveal from "../../components/ui/Reveal";
 import Sheet from "../../components/ui/Sheet";
-import { btn, chip } from "../../components/ui/styles";
+import { btn, chip, stretchedLink } from "../../components/ui/styles";
 import { achievementFilters, categoryLabel } from "@/lib/data";
 import { EASE_IOS, spring } from "@/lib/motion";
 import { useLang } from "@/lib/i18n";
@@ -75,17 +76,23 @@ export default function Achievements({ achievements }) {
               // Lapisan luar: animasi filter (layout & keluar). Tengah: animasi scroll ala Jitter. Dalam: hover/tap.
               <motion.div layout key={a.id} exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.2 } }} transition={spring.sheet}>
                 <Reveal className="h-full">
-                  <motion.button
-                    whileTap={{ scale: 0.98 }}
-                    transition={spring.press}
-                    onClick={() => openDetail(a)}
-                    className="card group w-full h-full text-left overflow-hidden"
-                  >
+                  <motion.article whileTap={{ scale: 0.98 }} transition={spring.press} className="card group relative w-full h-full overflow-hidden">
                     <ParallaxThumb
                       badge={
-                        <span className="absolute top-3 left-3 inline-flex items-center h-7 px-2.5 rounded-full glass text-[11px] font-bold text-fg">
-                          {L(categoryLabel[a.category])}
-                        </span>
+                        <>
+                          <span className="absolute top-3 left-3 inline-flex items-center h-7 px-2.5 rounded-full glass text-[11px] font-bold text-fg">
+                            {L(categoryLabel[a.category])}
+                          </span>
+                          {/* Aksi cepat: lihat sertifikat di sheet tanpa pindah halaman */}
+                          <button
+                            onClick={() => openDetail(a)}
+                            aria-label={`${t.quickView}: ${L(a.title)}`}
+                            title={t.quickView}
+                            className="pressable absolute z-10 top-3 right-3 grid place-items-center w-9 h-9 rounded-full glass text-fg opacity-90 hover:opacity-100"
+                          >
+                            <Maximize2 size={16} />
+                          </button>
+                        </>
                       }
                     >
                       <Image
@@ -97,18 +104,23 @@ export default function Achievements({ achievements }) {
                       />
                     </ParallaxThumb>
                     <div className="p-5">
-                      <h2 className="text-lg font-bold text-fg leading-snug">{L(a.title)}</h2>
+                      <h2 className="text-lg font-bold text-fg leading-snug">
+                        {/* Ketuk kartu di mana saja → halaman detail */}
+                        <Link href={`/achievements/${a.id}`} className={stretchedLink}>
+                          {L(a.title)}
+                        </Link>
+                      </h2>
                       <p className="mt-1 text-sm text-fg-2">{a.provider}</p>
                       <div className="mt-4 flex items-center justify-between gap-3 text-sm">
                         <span className="inline-flex items-center gap-1.5 text-fg-3">
                           <Calendar size={14} /> {date(a.date)}
                         </span>
-                        <span className="inline-flex items-center gap-0.5 font-semibold text-accent-fg">
+                        <span aria-hidden className="inline-flex items-center gap-0.5 font-semibold text-accent-fg">
                           {t.detail} <ChevronRight size={16} className="transition-transform group-hover:translate-x-0.5" />
                         </span>
                       </div>
                     </div>
-                  </motion.button>
+                  </motion.article>
                 </Reveal>
               </motion.div>
             ))}
@@ -136,7 +148,10 @@ export default function Achievements({ achievements }) {
                 </span>
                 <span className={chip}>{L(categoryLabel[selected.category])}</span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
+                <Link href={`/achievements/${selected.id}`} className={`${btn.primary} h-10 px-4 text-sm`}>
+                  {t.viewDetails} <ChevronRight size={16} />
+                </Link>
                 {selected.link && (
                   <a href={selected.link} target="_blank" rel="noopener noreferrer" className={`${btn.tonal} h-10 px-4 text-sm`}>
                     <BadgeCheck size={16} /> {t.verifyLink}

@@ -91,11 +91,11 @@ async function previewClient() {
   return isAdmin && mfaVerified ? supabase : null;
 }
 
-/** Seluruh konten portfolio. Di-cache per request (dipakai bersama oleh metadata & halaman). */
-export const getContent = cache(async () => {
+/** @param getAdmin  () => klien sesi admin untuk mode pratinjau, atau null (konten publik) */
+async function loadContent(getAdmin) {
   if (!isSupabaseConfigured) return fallbackContent();
   try {
-    const admin = await previewClient();
+    const admin = await getAdmin();
     const [data, settings] = await Promise.all([fetchFromSupabase(admin ?? createPublicSupabase(), Boolean(admin)), getSiteSettings()]);
     // Database masih kosong (belum menjalankan migrasi) → tampilkan konten lokal
     const empty = !data.technologies.length && !data.experiences.length && !data.achievements.length && !data.projects.length;
@@ -107,4 +107,13 @@ export const getContent = cache(async () => {
     console.warn(`[content] Supabase tidak bisa dihubungi, memakai konten lokal: ${error.message}`);
     return fallbackContent();
   }
-});
+}
+
+/** Seluruh konten portfolio. Di-cache per request (dipakai bersama oleh metadata & halaman). */
+export const getContent = cache(() => loadContent(previewClient));
+
+/**
+ * Konten yang dipublikasikan saja, tanpa membaca request (draftMode / cookie). Untuk kode yang
+ * berjalan di luar request halaman: generateStaticParams, sitemap & gambar Open Graph.
+ */
+export const getPublishedContent = cache(() => loadContent(async () => null));

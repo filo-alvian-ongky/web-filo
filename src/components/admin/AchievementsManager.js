@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import FormSheet from "./FormSheet";
 import ResourceList from "./ResourceList";
 import { MEDIA } from "./tokens";
-import { BilingualInput, Field, ImagePicker, PdfPicker, TextInput, Toggle, linkEn, useCloseForm, useToast } from "./fields";
+import { BilingualInput, Field, ImagePicker, MarkdownInput, PdfPicker, TextInput, Toggle, linkEn, useCloseForm, useToast } from "./fields";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import { saveAchievement } from "@/app/admin/actions";
 import { achievementFilters } from "@/lib/data";
@@ -24,6 +24,7 @@ const empty = () => ({
   thumb_path: null,
   pdf_path: null,
   link_url: "",
+  description: { id: "", en: "" },
   published: true,
 });
 
@@ -93,7 +94,7 @@ export default function AchievementsManager({ achievements, startNew = false }) 
         createLabel="Tambah pencapaian"
         toast={toast}
         onCreate={() => open(empty())}
-        onEdit={(row) => open({ ...row, title: linkEn(row.title), link_url: row.link_url ?? "" })}
+        onEdit={(row) => open({ ...row, title: linkEn(row.title), description: linkEn(row.description), link_url: row.link_url ?? "" })}
         describe={(a) => ({
           title: a.title?.id,
           subtitle: `${a.provider} · ${a.date}`,
@@ -141,6 +142,13 @@ export default function AchievementsManager({ achievements, startNew = false }) 
             <Field label="Link verifikasi (opsional)" hint="mis. link credential Dicoding / Coursera / LinkedIn.">
               <TextInput type="url" value={form.link_url} onChange={(link_url) => set({ link_url })} placeholder="https://" />
             </Field>
+
+            <MarkdownInput
+              label="Deskripsi (halaman detail, opsional)"
+              value={form.description}
+              onChange={(description) => set({ description })}
+              placeholder="Ceritakan kompetisi / riset / sertifikasi ini: apa yang dikerjakan, tantangannya, dan hasilnya."
+            />
 
             <Toggle label="Tampilkan di website" checked={form.published} onChange={(published) => set({ published })} />
           </>

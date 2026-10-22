@@ -86,6 +86,7 @@ create table if not exists public.achievements (
   thumb_path text,
   pdf_path text,
   link_url text,                                          -- link verifikasi sertifikat (opsional)
+  description jsonb not null default '{"id": "", "en": ""}', -- { id, en } markdown, tampil di halaman detail
   sort_order integer not null default 0,
   published boolean not null default true,
   created_at timestamptz not null default now(),
@@ -108,10 +109,16 @@ create table if not exists public.projects (
   icon text not null default 'sparkles',
   cover_path text,                                        -- gambar sampul (opsional, menggantikan gradien + ikon)
   thumb_path text,
+  -- Halaman detail (case study)
+  role jsonb not null default '{"id": "", "en": ""}',     -- { id, en }
+  period jsonb not null default '{"id": "", "en": ""}',   -- { id, en }
+  story jsonb not null default '{"id": "", "en": ""}',    -- { id, en } markdown: masalah → peran → proses → hasil
+  gallery text[] not null default '{}',                   -- path gambar penuh di bucket "media" (thumbnail = akhiran -thumb)
   sort_order integer not null default 0,
   published boolean not null default true,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  constraint projects_gallery_max check (cardinality(gallery) <= 8)
 );
 
 -- -----------------------------------------------------------------------------

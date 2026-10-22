@@ -79,6 +79,8 @@ Backup kedua di hari yang sama disimpan ke `backups/<tanggal>_<jam>` (tidak meni
 - Proyek yang sudah berjalan sebelum 2FA ditambahkan: jalankan [`security.sql`](./security.sql) sekali (isinya sudah ada di `schema.sql` terbaru).
 - Proyek yang sudah berjalan sebelum menu **Pengaturan Website** ada: jalankan [`site-content.sql`](./site-content.sql) sekali
   (membuat tabel `site_settings` + RLS dan mengisinya dengan isi website saat itu; isinya sudah ada di `schema.sql` terbaru).
+- Proyek yang sudah berjalan sebelum halaman detail (case study) ada: jalankan [`case-study.sql`](./case-study.sql) sekali
+  (kolom `role`, `period`, `story`, `gallery` di `projects` dan `description` di `achievements`; sudah ada di `schema.sql` terbaru).
 
 ### Rekomendasi di Vercel
 - Tambahkan env **`CRON_SECRET`** (teks acak panjang) → `/api/keepalive` hanya bisa dipanggil oleh Vercel Cron.
@@ -89,7 +91,8 @@ Backup kedua di hari yang sama disimpan ke `backups/<tanggal>_<jam>` (tidak meni
 ## Cara kerja singkat
 - **Data teks & link** → tabel Postgres. Teks dwibahasa disimpan sebagai `{ "id": "...", "en": "..." }` (EN kosong = memakai ID).
 - **Foto & PDF** → Supabase Storage bucket `media` (publik, maks. 20 MB/file). Gambar dikompres di browser ke WebP
-  (maks. 2000 px) + thumbnail 900 px saat disimpan. Database hanya menyimpan path file.
+  (maks. 2000 px) + thumbnail 900 px saat disimpan. Database hanya menyimpan path file. Galeri proyek (`projects.gallery`)
+  hanya menyimpan path gambar penuh (`…-full.webp`); thumbnail-nya file yang sama dengan akhiran `-thumb`.
 - **Tech stack** → tabel `technologies` + relasi ke pengalaman/proyek. Ikon diambil dari Simple Icons lewat pencarian di form.
   Section “Teknologi” di Home menampilkan teknologi yang dicentang **Tampilkan di Home**.
 - **Keamanan** → Row Level Security: publik hanya bisa membaca konten yang dipublikasikan; menulis & upload hanya untuk email di tabel `admins`.
