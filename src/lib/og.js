@@ -1,13 +1,15 @@
 // Gambar Open Graph (preview link di WhatsApp, LinkedIn, X, dll.) bergaya One UI:
 // latar gradasi biru gelap, logo dalam squircle, nama & judul halaman besar.
-// Dipakai oleh opengraph-image.js di tiap rute; dibuat statis saat build.
+// Dipakai oleh opengraph-image.js di tiap rute; dibuat statis saat build & diperbarui bersama halaman
+// (headline di bawah nama diambil dari Pengaturan Website → Profil CV).
 // ImageResponse (Satori) hanya mengenal <img> biasa, bukan next/image.
 /* eslint-disable @next/next/no-img-element */
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { ImageResponse } from "next/og";
-import { cvProfile, profile } from "./data";
+import { profile } from "./data";
+import { getSiteSettings } from "./content/server";
 
 export const ogSize = { width: 1200, height: 630 };
 export const ogContentType = "image/png";
@@ -40,7 +42,7 @@ const glow = (color, style) => ({
 
 /** @param {{ eyebrow: string, title: string, subtitle: string }} page */
 export async function renderOgImage({ eyebrow, title, subtitle }) {
-  const { fonts, logo } = await loadAssets();
+  const [{ fonts, logo }, { cvProfile }] = await Promise.all([loadAssets(), getSiteSettings()]);
   return new ImageResponse(
     (
       <div

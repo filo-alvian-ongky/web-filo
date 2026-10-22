@@ -3,6 +3,7 @@
 
 import { mediaUrl } from "../supabase/config";
 import { safeEmbedUrl, safeHttpUrl } from "../embeds.mjs";
+import { cvProfile, focusAreas, focusIntro, hero, highlights } from "../data";
 
 /** Teks dwibahasa → { id, en }. EN kosong otomatis memakai teks ID. */
 export function bilingual(value) {
@@ -87,4 +88,71 @@ export function homeTechStack(technologies, experiences, projects) {
   const used = new Map();
   [...experiences, ...projects].forEach((item) => item.stack.forEach((t) => used.set(t.name, t)));
   return [...used.values()];
+}
+
+// -----------------------------------------------------------------------------
+// Pengaturan website (tabel site_settings, satu baris per kunci)
+// -----------------------------------------------------------------------------
+
+/** Nilai bawaan tiap kunci = isi src/lib/data.js (dipakai bila barisnya belum ada) */
+export const SETTING_DEFAULTS = { hero, highlights, focus_intro: focusIntro, focus_areas: focusAreas, cv_profile: cvProfile };
+
+const HEX = /^#[0-9a-f]{6}$/i;
+const toneOf = (value) => (HEX.test(value ?? "") ? value : "#0A6CF5");
+const listOf = (value) => (Array.isArray(value) ? value.filter((v) => v && typeof v === "object") : []);
+const textOf = (value) => (typeof value === "string" ? value : "");
+// Link kontak CV: hanya http(s) / mailto / tel (lapisan pengaman kedua setelah validasi di server action)
+const contactHref = (value) => (/^(https?:\/\/|mailto:|tel:)\S+$/i.test(textOf(value)) ? value : null);
+
+const heroView = (v) => ({
+  badge: bilingual(v.badge),
+  typewriter: (Array.isArray(v.typewriter) ? v.typewriter : []).map(bilingual).filter((line) => line.id),
+  intro: bilingual(v.intro),
+});
+
+const highlightView = (h) => ({
+  value: bilingual(h.value),
+  label: bilingual(h.label),
+  tone: toneOf(h.tone),
+  // "achievements" = angka diisi otomatis dari jumlah pencapaian di CMS
+  countOf: h.countOf === "achievements" ? "achievements" : null,
+});
+
+const focusIntroView = (v) => ({ title: bilingual(v.title), subtitle: bilingual(v.subtitle) });
+
+const focusAreaView = (f) => ({
+  title: bilingual(f.title),
+  body: bilingual(f.body),
+  // Kunci ikon (lihat src/components/ui/focusIcons.js)
+  icon: textOf(f.icon) || "sparkles",
+  tone: toneOf(f.tone),
+});
+
+const cvProfileView = (v) => ({
+  headline: bilingual(v.headline),
+  summary: bilingual(v.summary),
+  education: { school: textOf(v.education?.school), major: bilingual(v.education?.major) },
+  publication: {
+    title: textOf(v.publication?.title),
+    authors: textOf(v.publication?.authors),
+    venue: bilingual(v.publication?.venue),
+  },
+  contacts: listOf(v.contacts).map((c) => ({ label: bilingual(c.label), value: textOf(c.value), href: contactHref(c.href) })),
+});
+
+/**
+ * Baris site_settings ([{ key, value }]) → pengaturan siap pakai.
+ * Kunci yang belum ada / isinya rusak memakai nilai bawaan dari data.js.
+ */
+export function settingsView(rows = []) {
+  const stored = Object.fromEntries(rows.map((r) => [r.key, r.value]));
+  const valueOf = (key, isValid) => (isValid(stored[key]) ? stored[key] : SETTING_DEFAULTS[key]);
+  const isObject = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
+  return {
+    hero: heroView(valueOf("hero", isObject)),
+    highlights: listOf(valueOf("highlights", Array.isArray)).map(highlightView),
+    focusIntro: focusIntroView(valueOf("focus_intro", isObject)),
+    focusAreas: listOf(valueOf("focus_areas", Array.isArray)).map(focusAreaView),
+    cvProfile: cvProfileView(valueOf("cv_profile", isObject)),
+  };
 }

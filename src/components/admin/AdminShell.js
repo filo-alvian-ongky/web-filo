@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ExternalLink, Globe, LogOut, Plus } from "lucide-react";
 import { ADMIN_NAV, activeAdminNav } from "./nav";
+import PreviewButton from "./PreviewButton";
 import BrandLogo from "@/components/ui/BrandLogo";
 import { ThemeToggle } from "@/components/Navbar";
 import { iconBtn } from "@/components/ui/styles";
@@ -71,6 +72,14 @@ function Sidebar({ email, active }) {
         >
           <Globe size={19} /> Lihat website <ExternalLink size={14} className="ml-auto text-fg-3" />
         </a>
+        <PreviewButton
+          label={
+            <>
+              Pratinjau draft <ExternalLink size={14} className="ml-auto text-fg-3" />
+            </>
+          }
+          className="pressable flex items-center gap-3 h-11 px-3.5 rounded-2xl text-[15px] font-semibold text-fg-2 hover:text-fg hover:bg-surface-2"
+        />
         <div className="flex items-center gap-2 p-2 rounded-[1.25rem] bg-surface/60 ring-1 ring-separator">
           <span aria-hidden className="grid place-items-center w-9 h-9 shrink-0 rounded-full bg-accent text-white text-sm font-bold uppercase">
             {email?.[0] ?? "A"}
@@ -166,7 +175,7 @@ function MobileTabBar({ active }) {
                       iconsOnly ? "h-0 opacity-0 leading-[0]" : "h-auto opacity-100 leading-none"
                     } ${on ? "text-accent-fg" : "text-fg-2"}`}
                   >
-                    {item.label}
+                    {item.short ?? item.label}
                   </span>
                 </Link>
               </li>

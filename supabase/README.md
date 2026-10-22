@@ -1,6 +1,7 @@
 # Setup CMS (Supabase)
 
-CMS ada di **`/admin`** untuk mengelola **Pengalaman, Pencapaian, Proyek, dan Teknologi**.
+CMS ada di **`/admin`** untuk mengelola **Pengalaman, Pencapaian, Proyek, Teknologi**, dan **Pengaturan Website**
+(teks hero, sorotan, bidang fokus di Home + profil CV).
 Selama Supabase belum disetel, website tetap tampil memakai konten lokal (`src/lib/content/seed.js`).
 
 ## 1. Buat proyek Supabase
@@ -51,7 +52,7 @@ npm run cms:backup
 ```
 Script hanya **membaca** dari Supabase (tidak mengubah/menghapus apa pun) dan menyimpan ke `backups/<tanggal>/`
 (folder ini di-`.gitignore`, jangan di-commit — isinya termasuk email admin):
-- `tables/*.json` — isi semua tabel CMS (`technologies`, `experiences`, `achievements`, `projects`, relasi teknologi, `admins`).
+- `tables/*.json` — isi semua tabel CMS (`technologies`, `experiences`, `achievements`, `projects`, relasi teknologi, `site_settings`, `admins`).
 - `media/` — semua file bucket `media` dengan struktur folder yang sama.
 - `restore.sql` — SQL untuk mengisi ulang tabel dari backup ini.
 - `manifest.json` — waktu backup, jumlah baris & file.
@@ -76,6 +77,8 @@ Backup kedua di hari yang sama disimpan ke `backups/<tanggal>_<jam>` (tidak meni
   `delete from auth.mfa_factors where user_id = (select id from auth.users where email = 'EMAIL_KAMU');`
 - Pendaftaran user baru **dimatikan** (Authentication → Sign In / Providers). Jangan diaktifkan lagi.
 - Proyek yang sudah berjalan sebelum 2FA ditambahkan: jalankan [`security.sql`](./security.sql) sekali (isinya sudah ada di `schema.sql` terbaru).
+- Proyek yang sudah berjalan sebelum menu **Pengaturan Website** ada: jalankan [`site-content.sql`](./site-content.sql) sekali
+  (membuat tabel `site_settings` + RLS dan mengisinya dengan isi website saat itu; isinya sudah ada di `schema.sql` terbaru).
 
 ### Rekomendasi di Vercel
 - Tambahkan env **`CRON_SECRET`** (teks acak panjang) → `/api/keepalive` hanya bisa dipanggil oleh Vercel Cron.
@@ -90,4 +93,8 @@ Backup kedua di hari yang sama disimpan ke `backups/<tanggal>_<jam>` (tidak meni
 - **Tech stack** → tabel `technologies` + relasi ke pengalaman/proyek. Ikon diambil dari Simple Icons lewat pencarian di form.
   Section “Teknologi” di Home menampilkan teknologi yang dicentang **Tampilkan di Home**.
 - **Keamanan** → Row Level Security: publik hanya bisa membaca konten yang dipublikasikan; menulis & upload hanya untuk email di tabel `admins`.
+- **Pengaturan Website** → tabel `site_settings` (satu baris JSON per bagian: `hero`, `highlights`, `focus_intro`, `focus_areas`, `cv_profile`).
+  Bila tabel kosong / belum dibuat, website memakai isi bawaan di `src/lib/data.js`.
+- **Pratinjau draft** → tombol **Pratinjau** di `/admin` membuka website dalam mode pratinjau (Next.js Draft Mode, lewat
+  `/api/preview`, khusus admin + 2FA): item yang disembunyikan (draft) ikut tampil. Keluar lewat tombol **Keluar** di website.
 - **Kecepatan** → halaman publik tetap statis (diperbarui tiap 1 jam) dan langsung diperbarui setiap kali konten disimpan di `/admin`.

@@ -1,7 +1,7 @@
 // Data SEO bersama: alamat situs, metadata Open Graph / Twitter per halaman & JSON-LD profil.
 // Dipakai oleh layout, page.js, robots.js, sitemap.js dan opengraph-image.js.
 
-import { cvProfile, profile, socialLinks } from "./data";
+import { profile, socialLinks } from "./data";
 
 export const SITE_URL = "https://filoalvian.com";
 
@@ -28,8 +28,11 @@ export function pageMetadata({ title, description, path }) {
   };
 }
 
-/** JSON-LD schema.org `Person` untuk mesin pencari (dipasang di layout). */
-export const personJsonLd = {
+/**
+ * JSON-LD schema.org `Person` untuk mesin pencari (dipasang di layout).
+ * @param cvProfile  profil CV dari Pengaturan Website (ringkasannya dipakai sebagai deskripsi)
+ */
+export const personJsonLd = (cvProfile) => ({
   "@context": "https://schema.org",
   "@type": "Person",
   name: profile.name,
@@ -40,4 +43,4 @@ export const personJsonLd = {
   description: cvProfile.summary.en,
   alumniOf: { "@type": "CollegeOrUniversity", name: profile.campus },
   sameAs: socialLinks.filter((s) => s.name === "LinkedIn" || s.name === "GitHub").map((s) => s.href),
-};
+});

@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import { motion, useMotionValueEvent, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import Card from "../Card";
 import RevealWords from "../ui/RevealWords";
-import { focusAreas } from "@/lib/data";
+import { FOCUS_ICONS } from "../ui/focusIcons";
 import { fadeUp, viewportOnce } from "@/lib/motion";
 import { useLang } from "@/lib/i18n";
 import { getLenis } from "@/lib/smoothScroll";
@@ -16,7 +16,7 @@ const pad = (n) => String(n).padStart(2, "0");
 function StackCard({ area, index, total, progress, sentinelRef }) {
   const { L } = useLang();
   const reduceMotion = useReducedMotion();
-  const Icon = area.icon;
+  const Icon = (FOCUS_ICONS[area.icon] ?? FOCUS_ICONS.sparkles).icon;
   // Kartu yang tertimpa kartu berikutnya mengecil sedikit → kesan tumpukan yang dalam
   const scale = useTransform(progress, [index / total, 1], [1, 1 - (total - 1 - index) * 0.05]);
 
@@ -52,13 +52,16 @@ function StackCard({ area, index, total, progress, sentinelRef }) {
 /**
  * Scene "Eksplorasi": kartu bidang fokus menempel & menumpuk satu per satu saat digulir.
  * Desktop: judul + daftar kemajuan menempel di kiri, tumpukan kartu di kanan.
+ * @param intro  judul & teks pengantar section ({ title, subtitle }) dari Pengaturan Website
+ * @param areas  bidang fokus dari Pengaturan Website ({ title, body, icon, tone })
  */
-export default function FocusStack() {
-  const { t, L } = useLang();
+export default function FocusStack({ intro, areas }) {
+  const { L } = useLang();
+  const subtitle = L(intro.subtitle);
   const stackRef = useRef(null);
   const sentinels = useRef([]);
   const [active, setActive] = useState(0);
-  const total = focusAreas.length;
+  const total = areas.length;
 
   const { scrollYProgress } = useScroll({ target: stackRef, offset: ["start 0.25", "end end"] });
   const { scrollY } = useScroll();
@@ -99,16 +102,18 @@ export default function FocusStack() {
             >
               {pad(active + 1)} / {pad(total)}
             </motion.p>
-            <RevealWords as="h2" text={t.explore} className="md:mt-2 text-3xl md:text-5xl font-extrabold tracking-tight text-fg" />
-            <motion.p variants={fadeUp} initial="hidden" whileInView="visible" viewport={viewportOnce} className="mt-3 max-w-sm text-fg-2 leading-relaxed">
-              {t.exploreSub}
-            </motion.p>
+            <RevealWords as="h2" text={L(intro.title)} className="md:mt-2 text-3xl md:text-5xl font-extrabold tracking-tight text-fg" />
+            {subtitle && (
+              <motion.p variants={fadeUp} initial="hidden" whileInView="visible" viewport={viewportOnce} className="mt-3 max-w-sm text-fg-2 leading-relaxed">
+                {subtitle}
+              </motion.p>
+            )}
 
             <ol className="hidden md:block mt-10 space-y-1">
-              {focusAreas.map((f, i) => {
+              {areas.map((f, i) => {
                 const on = i === active;
                 return (
-                  <li key={f.tone}>
+                  <li key={i}>
                     <button
                       type="button"
                       onClick={() => goTo(i)}
@@ -132,8 +137,8 @@ export default function FocusStack() {
         </div>
 
         <div ref={stackRef} className="md:col-span-7 [--stack-top:80px] md:[--stack-top:128px]">
-          {focusAreas.map((f, i) => (
-            <StackCard key={f.tone} area={f} index={i} total={total} progress={scrollYProgress} sentinelRef={(el) => (sentinels.current[i] = el)} />
+          {areas.map((f, i) => (
+            <StackCard key={i} area={f} index={i} total={total} progress={scrollYProgress} sentinelRef={(el) => (sentinels.current[i] = el)} />
           ))}
         </div>
       </div>

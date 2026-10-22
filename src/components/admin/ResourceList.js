@@ -2,26 +2,27 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { ArrowDown, ArrowUp, Eye, EyeOff, Pencil, Plus, Trash2 } from "lucide-react";
+import { Eye, EyeOff, Pencil, Plus, Trash2 } from "lucide-react";
 import AdminPageHeader from "./AdminPageHeader";
+import PreviewButton from "./PreviewButton";
+import SortableList, { smallBtn } from "./SortableList";
 import { LIST, countKey } from "./tokens";
 import { btn } from "@/components/ui/styles";
-import { slideIn, stagger } from "@/lib/motion";
 import { deleteItem, reorderItems, setPublished } from "@/app/admin/actions";
 
-const smallBtn =
-  "pressable grid place-items-center w-9 h-9 rounded-full text-fg-2 hover:text-fg hover:bg-surface-2 disabled:opacity-30 disabled:pointer-events-none";
+// Halaman website tempat konten tiap tabel tampil (tujuan tombol Pratinjau)
+const PREVIEW_PATH = { experiences: "/experience", achievements: "/achievements", projects: "/projects", technologies: "/" };
 
 /**
- * Daftar konten CMS: urutkan (naik/turun), tampil/sembunyikan, edit, hapus.
+ * Daftar konten CMS: urutkan (drag-and-drop / naik-turun), tampil/sembunyikan, edit, hapus.
  * @param describe  (item) => { title, subtitle, media? }
  */
 export default function ResourceList({ table, title, description, items, describe, onCreate, onEdit, toast, canPublish = true, createLabel = "Tambah" }) {
   const router = useRouter();
-  const [order, setOrder] = useState(null);
+  // Urutan baru tampil seketika sampai data dari server (router.refresh) tiba
+  const [optimistic, setOptimistic] = useState(null);
   const [busyId, setBusyId] = useState(null);
-  const list = order ?? items;
+  const list = optimistic?.base === items ? optimistic.list : items;
   const drafts = canPublish ? items.filter((i) => !i.published).length : 0;
 
   // Ingat jumlah item → skeleton saat kembali ke halaman ini menampilkan jumlah baris yang sama
@@ -33,15 +34,14 @@ export default function ResourceList({ table, title, description, items, describ
     }
   }, [table, items.length]);
 
-  const move = async (index, delta) => {
-    const next = [...list];
-    const [item] = next.splice(index, 1);
-    next.splice(index + delta, 0, item);
-    setOrder(next);
+  const saveOrder = async (next) => {
+    setOptimistic({ base: items, list: next });
     const res = await reorderItems(table, next.map((i) => i.id));
-    if (!res.ok) toast.show(res.error, true);
+    if (!res.ok) {
+      toast.show(res.error, true);
+      setOptimistic(null);
+    }
     router.refresh();
-    setOrder(null);
   };
 
   const togglePublish = async (item) => {
@@ -69,9 +69,14 @@ export default function ResourceList({ table, title, description, items, describ
         title={title}
         description={description}
         actions={
-          <button onClick={onCreate} className={`${btn.primary} hidden md:inline-flex`}>
-            <Plus size={18} strokeWidth={2.5} /> {createLabel}
-          </button>
+          <>
+            <PreviewButton path={PREVIEW_PATH[table]} />
+            {/* HP: tambah lewat tombol bundar di tab bar. max-md:hidden (bukan hidden md:inline-flex) karena
+                kelas inline-flex bawaan btn ditulis setelah .hidden di CSS sehingga selalu menang */}
+            <button onClick={onCreate} className={`${btn.primary} max-md:hidden`}>
+              <Plus size={18} strokeWidth={2.5} /> {createLabel}
+            </button>
+          </>
         }
       />
 
@@ -84,26 +89,19 @@ export default function ResourceList({ table, title, description, items, describ
           </button>
         </div>
       ) : (
-        <motion.ol variants={stagger(0.04, 0.15)} initial="hidden" animate="visible" className={LIST.card}>
-          {list.map((item, i) => {
+        <SortableList
+          items={list}
+          getKey={(item) => item.id}
+          onReorder={saveOrder}
+          className={LIST.card}
+          rowClassName={(item) =>
+            `group ${LIST.row} transition-colors hover:bg-surface-2/70 ${busyId === item.id ? "opacity-50 pointer-events-none" : ""}`
+          }
+          renderRow={(item) => {
             const d = describe(item);
             const hidden = canPublish && !item.published;
             return (
-              <motion.li
-                key={item.id}
-                variants={slideIn}
-                className={`group ${LIST.row} transition-colors hover:bg-surface-2/70 ${
-                  busyId === item.id ? "opacity-50 pointer-events-none" : ""
-                }`}
-              >
-                <div className="flex flex-col">
-                  <button className={`${smallBtn} w-8 h-7`} disabled={i === 0} onClick={() => move(i, -1)} aria-label="Naikkan">
-                    <ArrowUp size={15} />
-                  </button>
-                  <button className={`${smallBtn} w-8 h-7`} disabled={i === list.length - 1} onClick={() => move(i, 1)} aria-label="Turunkan">
-                    <ArrowDown size={15} />
-                  </button>
-                </div>
+              <>
                 {d.media}
                 <button onClick={() => onEdit(item)} className="flex-1 min-w-0 text-left py-1">
                   <span className="flex items-center gap-2 min-w-0">
@@ -130,10 +128,10 @@ export default function ResourceList({ table, title, description, items, describ
                     <Trash2 size={16} />
                   </button>
                 </div>
-              </motion.li>
+              </>
             );
-          })}
-        </motion.ol>
+          }}
+        />
       )}
     </section>
   );

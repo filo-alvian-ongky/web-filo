@@ -99,12 +99,17 @@ export default function CvDocument({ data }) {
             <Text style={s.role}>{data.headline}</Text>
           </View>
           <View style={s.contact}>
-            {data.contacts.map((c) => (
-              <View key={c.href} style={s.contactRow}>
+            {data.contacts.map((c, i) => (
+              <View key={i} style={s.contactRow}>
                 <Text style={s.contactKey}>{c.label}</Text>
-                <Link src={c.href} style={s.contactVal}>
-                  {c.value}
-                </Link>
+                {/* Kontak dari Pengaturan Website boleh tanpa link */}
+                {c.href ? (
+                  <Link src={c.href} style={s.contactVal}>
+                    {c.value}
+                  </Link>
+                ) : (
+                  <Text style={s.contactVal}>{c.value}</Text>
+                )}
               </View>
             ))}
           </View>
@@ -150,22 +155,26 @@ export default function CvDocument({ data }) {
               </Section>
             )}
 
-            <Section title={L.publication}>
-              <View style={s.item} wrap={false}>
-                <Text style={[s.title, { fontSize: 8.8, lineHeight: 1.45 }]}>{data.publication.title}</Text>
-                <Text style={[s.p, { marginTop: 2.5 }]}>{data.publication.authors}</Text>
-                <Text style={s.sub}>{data.publication.venue}</Text>
-              </View>
-            </Section>
+            {data.publication.title ? (
+              <Section title={L.publication}>
+                <View style={s.item} wrap={false}>
+                  <Text style={[s.title, { fontSize: 8.8, lineHeight: 1.45 }]}>{data.publication.title}</Text>
+                  {data.publication.authors ? <Text style={[s.p, { marginTop: 2.5 }]}>{data.publication.authors}</Text> : null}
+                  {data.publication.venue ? <Text style={s.sub}>{data.publication.venue}</Text> : null}
+                </View>
+              </Section>
+            ) : null}
           </View>
 
           <View style={s.right}>
-            <Section title={L.education}>
-              <View style={s.sideItem}>
-                <Text style={s.sideTitle}>{data.education.school}</Text>
-                <Text style={s.sideSub}>{data.education.major}</Text>
-              </View>
-            </Section>
+            {data.education.school ? (
+              <Section title={L.education}>
+                <View style={s.sideItem}>
+                  <Text style={s.sideTitle}>{data.education.school}</Text>
+                  {data.education.major ? <Text style={s.sideSub}>{data.education.major}</Text> : null}
+                </View>
+              </Section>
+            ) : null}
             {data.awards.length > 0 && (
               <Section title={L.awards}>
                 <SideList items={data.awards} />

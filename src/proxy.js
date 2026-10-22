@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-// Proxy (dulu "middleware") khusus /admin: memperbarui token login Supabase di cookie
-// dan mengarahkan pengunjung yang belum login ke halaman login admin.
+// Proxy (dulu "middleware"): memperbarui token login Supabase di cookie.
+// - /admin: sekaligus mengarahkan pengunjung yang belum login ke halaman login admin.
+// - Halaman publik dalam mode pratinjau (cookie draftMode): sesi admin diperbarui di sini karena
+//   Server Component tidak bisa menulis cookie — tanpa ini token kedaluwarsa membuat draft hilang.
 export async function proxy(request) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -25,8 +27,9 @@ export async function proxy(request) {
   const { data } = await supabase.auth.getClaims();
   const signedIn = Boolean(data?.claims?.sub);
 
-  const onLogin = request.nextUrl.pathname.startsWith("/admin/login");
-  if (!signedIn && !onLogin) {
+  const { pathname } = request.nextUrl;
+  const protectedAdmin = pathname.startsWith("/admin") && !pathname.startsWith("/admin/login");
+  if (!signedIn && protectedAdmin) {
     const login = request.nextUrl.clone();
     login.pathname = "/admin/login";
     login.search = "";
@@ -36,5 +39,9 @@ export async function proxy(request) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: [
+    "/admin/:path*",
+    // Halaman publik hanya saat mode pratinjau aktif (pengunjung biasa tidak melewati proxy)
+    { source: "/((?!admin|api/|_next/|.*\\..*).*)", has: [{ type: "cookie", key: "__prerender_bypass" }] },
+  ],
 };

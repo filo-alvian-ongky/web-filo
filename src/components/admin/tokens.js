@@ -32,5 +32,13 @@ export const DASHBOARD = {
   row: "flex items-center gap-3 px-3 py-2.5 rounded-[1.1rem]",
 };
 
+// Halaman Pengaturan Website: satu kartu per bagian (hero, sorotan, bidang fokus, profil CV)
+export const SETTINGS = {
+  stack: "space-y-3 md:space-y-4",
+  card: "card p-1.5 md:p-2",
+  head: "flex items-start justify-between gap-3 px-3 pt-3 pb-2",
+  body: "px-3 pb-3",
+};
+
 /** Kunci sessionStorage jumlah item terakhir per tabel (skeleton menampilkan jumlah baris yang sama) */
 export const countKey = (table) => `cms:count:${table}`;

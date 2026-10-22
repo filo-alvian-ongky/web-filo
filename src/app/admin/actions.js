@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { getAdminSession } from "@/lib/supabase/server";
 import { MEDIA_BUCKET } from "@/lib/supabase/config";
 import { safeEmbedUrl, safeHttpUrl } from "@/lib/embeds.mjs";
+import { FOCUS_ICONS } from "@/components/ui/focusIcons";
 
 const TABLES = ["technologies", "experiences", "achievements", "projects"];
 // Kolom file per tabel (untuk dibersihkan dari storage saat baris dihapus)
@@ -231,6 +232,109 @@ export async function saveProject(input) {
     await removeFiles(supabase, input.removedPaths ?? []);
     refreshSite();
     return { id };
+  });
+}
+
+// -----------------------------------------------------------------------------
+// Pengaturan Website (tabel site_settings): hero, sorotan, bidang fokus, profil CV
+// -----------------------------------------------------------------------------
+
+/** Teks dwibahasa dengan batas panjang (kolom jsonb tidak punya batas sendiri) */
+function bilingualField(value, label, { max = 300, required = true } = {}) {
+  const v = bilingual(value);
+  if (required && !v.id) throw new Error(`${label} wajib diisi.`);
+  if (v.id.length > max || v.en.length > max) throw new Error(`${label} maksimal ${max} karakter.`);
+  return v;
+}
+
+function textField(value, label, { max = 300, required = true } = {}) {
+  const v = text(value);
+  if (required && !v) throw new Error(`${label} wajib diisi.`);
+  if (v.length > max) throw new Error(`${label} maksimal ${max} karakter.`);
+  return v;
+}
+
+function listField(value, label, { min = 0, max }) {
+  if (!Array.isArray(value)) throw new Error(`${label} tidak valid.`);
+  if (value.length < min) throw new Error(`${label} minimal ${min} item.`);
+  if (value.length > max) throw new Error(`${label} maksimal ${max} item.`);
+  return value;
+}
+
+function hexField(value, label) {
+  const v = text(value);
+  if (!HEX.test(v)) throw new Error(`Warna ${label} harus kode hex, mis. #0A6CF5.`);
+  return v.toUpperCase();
+}
+
+/** Link kontak CV: kosong, https://…, mailto:… atau tel:… */
+function contactHref(value, label) {
+  const raw = text(value);
+  if (!raw) return null;
+  if (/^(mailto:|tel:)[^\s<>"']+$/i.test(raw) || (/^https?:\/\/\S+$/i.test(raw) && safeHttpUrl(raw))) return raw;
+  throw new Error(`Link kontak "${label}" harus diawali https://, mailto: atau tel:.`);
+}
+
+// Validasi + bentuk akhir tiap kunci (field lain yang dikirim browser diabaikan)
+const SETTINGS = {
+  hero: (v) => ({
+    badge: bilingualField(v?.badge, "Label status", { max: 60, required: false }),
+    typewriter: listField(v?.typewriter, "Baris typewriter", { min: 1, max: 6 }).map((line, i) =>
+      bilingualField(line, `Baris typewriter ${i + 1}`, { max: 40 })
+    ),
+    intro: bilingualField(v?.intro, "Kalimat perkenalan", { max: 400 }),
+  }),
+  highlights: (v) =>
+    listField(v, "Sorotan", { max: 8 }).map((h, i) => {
+      const countOf = h?.countOf === "achievements" ? "achievements" : null;
+      return {
+        // Widget hitung otomatis: angka diisi dari jumlah pencapaian, nilai hanya cadangan
+        value: bilingualField(countOf ? { id: text(h?.value?.id) || "0" } : h?.value, `Nilai sorotan ${i + 1}`, { max: 24 }),
+        label: bilingualField(h?.label, `Keterangan sorotan ${i + 1}`, { max: 60 }),
+        tone: hexField(h?.tone, `sorotan ${i + 1}`),
+        countOf,
+      };
+    }),
+  focus_intro: (v) => ({
+    title: bilingualField(v?.title, "Judul section", { max: 40 }),
+    subtitle: bilingualField(v?.subtitle, "Teks pengantar", { max: 200, required: false }),
+  }),
+  focus_areas: (v) =>
+    listField(v, "Bidang fokus", { max: 8 }).map((f, i) => {
+      if (!FOCUS_ICONS[f?.icon]) throw new Error(`Ikon bidang fokus ${i + 1} tidak dikenal.`);
+      return {
+        title: bilingualField(f?.title, `Judul bidang fokus ${i + 1}`, { max: 80 }),
+        body: bilingualField(f?.body, `Deskripsi bidang fokus ${i + 1}`, { max: 300 }),
+        icon: f.icon,
+        tone: hexField(f?.tone, `bidang fokus ${i + 1}`),
+      };
+    }),
+  cv_profile: (v) => ({
+    headline: bilingualField(v?.headline, "Headline CV", { max: 120 }),
+    summary: bilingualField(v?.summary, "Ringkasan CV", { max: 600 }),
+    education: {
+      school: textField(v?.education?.school, "Nama kampus / sekolah", { max: 120, required: false }),
+      major: bilingualField(v?.education?.major, "Jurusan", { max: 120, required: false }),
+    },
+    publication: {
+      title: textField(v?.publication?.title, "Judul publikasi", { max: 400, required: false }),
+      authors: textField(v?.publication?.authors, "Penulis publikasi", { max: 300, required: false }),
+      venue: bilingualField(v?.publication?.venue, "Tempat terbit", { max: 300, required: false }),
+    },
+    contacts: listField(v?.contacts, "Kontak CV", { max: 8 }).map((c, i) => {
+      const label = bilingualField(c?.label, `Label kontak ${i + 1}`, { max: 30 });
+      return { label, value: textField(c?.value, `Isi kontak "${label.id}"`, { max: 120 }), href: contactHref(c?.href, label.id) };
+    }),
+  }),
+};
+
+/** Simpan satu bagian Pengaturan Website (menggantikan isi kunci itu seluruhnya) */
+export async function saveSiteSetting(key, value) {
+  return run(async (supabase) => {
+    const shape = SETTINGS[key];
+    if (!shape) throw new Error("Pengaturan tidak dikenal.");
+    check(await supabase.from("site_settings").upsert({ key, value: shape(value) }));
+    refreshSite();
   });
 }
 

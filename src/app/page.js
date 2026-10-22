@@ -12,6 +12,16 @@ export const metadata = pageMetadata({
 export const revalidate = 3600;
 
 export default async function Page() {
-  const { techStack, achievements } = await getContent();
-  return <Home techStack={techStack} achievements={achievements.slice(0, 4)} achievementCount={achievements.length} />;
+  const { techStack, achievements, settings } = await getContent();
+  return (
+    <Home
+      hero={settings.hero}
+      highlights={settings.highlights}
+      focusIntro={settings.focusIntro}
+      focusAreas={settings.focusAreas}
+      techStack={techStack}
+      achievements={achievements.slice(0, 4)}
+      achievementCount={achievements.length}
+    />
+  );
 }

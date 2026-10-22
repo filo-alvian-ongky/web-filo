@@ -1,8 +1,10 @@
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { draftMode } from "next/headers";
 import "./globals.css";
 import AppShell from "../components/AppShell";
 import { SITE_URL, personJsonLd } from "@/lib/seo";
 import { profile } from "@/lib/data";
+import { getSiteSettings } from "@/lib/content/server";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -42,16 +44,19 @@ export const viewport = {
 // dan bahasa default-nya Indonesia.
 const themeInitScript = `(function(){try{var h=document.documentElement;var s=localStorage.getItem('theme');var d=s?s==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)h.classList.add('dark');if(localStorage.getItem('lang')==='en')h.lang='en';}catch(e){}})();`;
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  // Saat build / ISR selalu false (halaman tetap statis); true hanya untuk admin yang membuka /api/preview
+  const { isEnabled: preview } = await draftMode();
+  const { cvProfile } = await getSiteSettings();
   return (
     <html lang="id" className={jakarta.variable} data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         {/* Data terstruktur profil (schema.org Person) untuk mesin pencari; "<" di-escape agar aman di dalam <script> */}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd).replace(/</g, "\\u003c") }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd(cvProfile)).replace(/</g, "\\u003c") }} />
       </head>
       <body className="antialiased">
-        <AppShell>{children}</AppShell>
+        <AppShell preview={preview}>{children}</AppShell>
       </body>
     </html>
   );

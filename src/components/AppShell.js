@@ -14,6 +14,7 @@ import ContactSheet from "./ContactSheet";
 import IntroModal from "./element/IntroModal";
 import FiloAssistant from "./FiloAssistant";
 import ParticleNetwork from "./ParticleNetwork";
+import PreviewBanner from "./PreviewBanner";
 import SmoothScroll from "./providers/SmoothScroll";
 
 // Judul tab browser ikut bahasa yang dipilih (metadata server tetap versi Indonesia)
@@ -42,7 +43,8 @@ function DocumentTitle() {
   return null;
 }
 
-export default function AppShell({ children }) {
+/** @param preview  mode pratinjau admin (draftMode) aktif → tampilkan penanda + tombol keluar */
+export default function AppShell({ children, preview = false }) {
   const pathname = usePathname();
 
   // Panel admin (CMS): latar yang sama dengan website, tapi tanpa navbar, tab bar & footer publik
@@ -73,9 +75,11 @@ export default function AppShell({ children }) {
         <ContactSheet />
         <IntroModal />
         <FiloAssistant />
-        {/* Statistik pengunjung & kecepatan (Vercel, tanpa cookie) — hanya halaman publik, panel admin tidak ikut dihitung */}
-        <Analytics />
-        <SpeedInsights />
+        {preview && <PreviewBanner />}
+        {/* Statistik pengunjung & kecepatan (Vercel, tanpa cookie) — hanya halaman publik; panel admin
+            & mode pratinjau admin tidak ikut dihitung */}
+        {!preview && <Analytics />}
+        {!preview && <SpeedInsights />}
       </MotionConfig>
     </UIProvider>
   );

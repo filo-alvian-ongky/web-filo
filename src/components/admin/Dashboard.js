@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowUpRight, ChevronRight, Clock3, Plus } from "lucide-react";
 import AdminPageHeader from "./AdminPageHeader";
 import { ADMIN_NAV } from "./nav";
+import PreviewButton from "./PreviewButton";
 import { DASHBOARD } from "./tokens";
 import Card from "@/components/Card";
 import CountUp from "@/components/ui/CountUp";
@@ -46,9 +47,12 @@ export default function Dashboard({ greeting, stats, activity, setupError }) {
         title="Dasbor"
         description="Kelola konten portfolio. Setiap perubahan yang disimpan langsung tampil di website."
         actions={
-          <a href="/" target="_blank" rel="noopener noreferrer" className={btn.secondary}>
-            Lihat website <ArrowUpRight size={17} />
-          </a>
+          <>
+            <PreviewButton />
+            <a href="/" target="_blank" rel="noopener noreferrer" className={btn.secondary}>
+              Lihat website <ArrowUpRight size={17} />
+            </a>
+          </>
         }
       />
 

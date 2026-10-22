@@ -1,9 +1,12 @@
-// Konten tetap website (profil, navigasi, sorotan, bidang fokus).
+// Konten tetap website (profil, navigasi, kontak).
 // Pengalaman, pencapaian, proyek & tech stack dikelola lewat CMS (/admin) —
 // lihat src/lib/content (konten awalnya ada di src/lib/content/seed.js).
+// Hero, sorotan, bidang fokus & profil CV dikelola di /admin → Pengaturan Website (tabel site_settings);
+// nilai di file ini hanya cadangan saat tabel itu kosong / tidak bisa diakses (isinya sama dengan
+// nilai awal di supabase/site-content.sql).
 // Teks dwibahasa ditulis sebagai { id: "...", en: "..." } dan dibaca lewat `L()` dari useLang().
 
-import { House, BriefcaseBusiness, Trophy, LayoutGrid, PanelsTopLeft, Cpu, Gamepad2 } from "lucide-react";
+import { House, BriefcaseBusiness, Trophy, LayoutGrid } from "lucide-react";
 import { FaGithub, FaLinkedin, FaInstagram } from "react-icons/fa";
 
 export const profile = {
@@ -20,8 +23,21 @@ export const profile = {
   cv: { id: "/cv/id", en: "/cv/en" },
 };
 
-// Bagian CV yang tidak dikelola CMS. Pengalaman, prestasi, sertifikasi, proyek & keahlian
-// diambil otomatis dari CMS (yang terbaru & terbaik) — lihat src/lib/cv/select.js
+// Hero Home. Kalimat perkenalan: **teks** = tebal, ==teks== = tebal berwarna aksen.
+export const hero = {
+  badge: { id: "Terbuka untuk kolaborasi", en: "Open to collaboration" },
+  typewriter: [
+    { id: "Halo, pengunjung!", en: "Hello, visitor!" },
+    { id: "Salam kenal ya!", en: "Nice to meet you!" },
+  ],
+  intro: {
+    id: "Saya **Filo Alvian Ongky**, Mahasiswa Ilmu Komputer berdedikasi dengan fokus pada pengembangan sistem cerdas dan UI/UX di ==BINUS University==.",
+    en: "I'm **Filo Alvian Ongky**, a dedicated Computer Science student at ==BINUS University==, focused on building intelligent systems and UI/UX.",
+  },
+};
+
+// Profil CV. Pengalaman, prestasi, sertifikasi, proyek & keahlian diambil otomatis
+// dari CMS (yang terbaru & terbaik) — lihat src/lib/cv/select.js
 export const cvProfile = {
   headline: { id: "Mahasiswa Ilmu Komputer · BINUS University", en: "Computer Science Student · BINUS University" },
   summary: {
@@ -74,6 +90,15 @@ export const highlights = [
   { value: "7", countOf: "achievements", label: { id: "Sertifikat & penghargaan", en: "Certificates & awards" }, tone: "#12A150" },
 ];
 
+// Judul & teks pengantar section "Eksplorasi" (di atas kartu bidang fokus)
+export const focusIntro = {
+  title: { id: "Eksplorasi", en: "Exploration" },
+  subtitle: {
+    id: "Tiga bidang yang saya tekuni — dari antarmuka web, riset IoT, hingga desain level.",
+    en: "Three areas I work in — from web interfaces and IoT research to level design.",
+  },
+};
+
 export const focusAreas = [
   {
     title: { id: "UI/UX & Pemrograman Web", en: "UI/UX & Web Development" },
@@ -81,7 +106,8 @@ export const focusAreas = [
       id: "Perancang UI/UX & Fullstack Web Developer menggunakan Next.js & Figma.",
       en: "UI/UX designer & fullstack web developer working with Next.js & Figma.",
     },
-    icon: PanelsTopLeft,
+    // Kunci ikon → src/components/ui/focusIcons.js
+    icon: "web",
     tone: "#0A6CF5",
   },
   {
@@ -90,7 +116,7 @@ export const focusAreas = [
       id: "Penulis publikasi ilmiah mengenai pemantauan stres berbasis sensor biometrik di Procedia CS.",
       en: "Author of a scientific publication on biometric sensor-based stress monitoring in Procedia CS.",
     },
-    icon: Cpu,
+    icon: "cpu",
     tone: "#12A150",
   },
   {
@@ -99,7 +125,7 @@ export const focusAreas = [
       id: "Berpengalaman sebagai Commissioned Level Designer dalam merancang tata letak dan pengalaman spasial interaktif.",
       en: "Experienced as a Commissioned Level Designer, crafting layouts and interactive spatial experiences.",
     },
-    icon: Gamepad2,
+    icon: "gamepad",
     tone: "#F97316",
   },
 ];

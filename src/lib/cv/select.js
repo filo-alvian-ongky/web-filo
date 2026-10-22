@@ -1,7 +1,7 @@
 // Memilih isi CV dari konten CMS: hanya yang TERBARU & TERBAIK, bukan semuanya,
 // supaya CV tetap 1 halaman dan langsung menonjolkan hal paling kuat.
 
-import { cvProfile, profile } from "../data";
+import { profile } from "../data";
 
 // Batas jumlah item per bagian CV
 export const CV_LIMITS = { experiences: 4, points: 3, awards: 3, certifications: 4, projects: 3, skills: 16 };
@@ -56,6 +56,8 @@ const monthYear = (iso, lang) =>
 export function buildCv(content, lang, now = Date.now()) {
   const L = (v) => pick(v, lang);
   const { experiences, achievements, projects, technologies, techStack } = content;
+  // Headline, ringkasan, pendidikan, publikasi & kontak dari Pengaturan Website → Profil CV
+  const { cvProfile } = content.settings;
 
   const awards = bestOf(achievements.filter((a) => a.category === "competition"), CV_LIMITS.awards, now);
   const certifications = bestOf(achievements.filter((a) => a.category !== "competition"), CV_LIMITS.certifications, now);
