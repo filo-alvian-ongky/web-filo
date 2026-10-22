@@ -3,6 +3,8 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { MotionConfig } from "framer-motion";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { useLang } from "@/lib/i18n";
 import { UIProvider } from "./providers/UIProvider";
 import Navbar from "./Navbar";
@@ -71,6 +73,9 @@ export default function AppShell({ children }) {
         <ContactSheet />
         <IntroModal />
         <FiloAssistant />
+        {/* Statistik pengunjung & kecepatan (Vercel, tanpa cookie) — hanya halaman publik, panel admin tidak ikut dihitung */}
+        <Analytics />
+        <SpeedInsights />
       </MotionConfig>
     </UIProvider>
   );

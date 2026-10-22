@@ -6,9 +6,12 @@ const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 // Content-Security-Policy: browser hanya boleh memuat script/gambar/koneksi dari sumber yang dikenal.
 // 'unsafe-inline' tetap dibutuhkan untuk script inline Next.js & tema (halaman statis tanpa nonce);
 // 'wasm-unsafe-eval' untuk mesin fisika lanyard (Rapier/WebAssembly).
+// Vercel Web Analytics & Speed Insights di produksi dimuat & mengirim data lewat origin sendiri
+// (/_vercel/insights/*, /_vercel/speed-insights/*) → cukup 'self'. Hanya mode dev yang memuat
+// skrip debug-nya dari va.vercel-scripts.com.
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval' https://va.vercel-scripts.com" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${supabase}`,
   "font-src 'self' data:",

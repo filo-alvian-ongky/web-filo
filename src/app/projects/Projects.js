@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUpRight, Play, X } from "lucide-react";
+import { track } from "@vercel/analytics";
 import PageHeader from "../../components/ui/PageHeader";
 import ProjectArt from "../../components/ui/ProjectArt";
 import Reveal from "../../components/ui/Reveal";
@@ -90,7 +91,10 @@ export default function Projects({ projects }) {
                   as="button"
                   resetOnPress
                   layoutId={`project-${p.id}`}
-                  onClick={() => setSelectedId(p.id)}
+                  onClick={() => {
+                    setSelectedId(p.id);
+                    track("project_open", { slug: p.slug });
+                  }}
                   whileTap={{ scale: 0.98 }}
                   transition={spring.press}
                   className="card group w-full text-left overflow-hidden"
@@ -113,6 +117,7 @@ export default function Projects({ projects }) {
                   href={p.linkUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => track("project_open", { slug: p.slug })}
                   whileTap={{ scale: 0.98 }}
                   transition={spring.press}
                   className="card group block w-full overflow-hidden"

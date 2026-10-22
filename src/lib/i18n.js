@@ -118,6 +118,12 @@ const dict = {
     aiInput: "Pesan untuk AI",
     aiSend: "Kirim pesan",
     aiClose: "Tutup chat",
+
+    nfEyebrow: "Galat 404",
+    nfTitle: "Halaman tidak ditemukan",
+    nfDesc: "Halaman yang Anda cari mungkin sudah dipindahkan, dihapus, atau alamatnya salah ketik.",
+    nfHome: "Kembali ke Beranda",
+    nfProjects: "Lihat Proyek",
   },
   en: {
     mainNav: "Main navigation",
@@ -206,6 +212,12 @@ const dict = {
     aiInput: "Message to the AI",
     aiSend: "Send message",
     aiClose: "Close chat",
+
+    nfEyebrow: "Error 404",
+    nfTitle: "Page not found",
+    nfDesc: "The page you're looking for may have been moved, removed, or the address was mistyped.",
+    nfHome: "Back to Home",
+    nfProjects: "View Projects",
   },
 };
 

@@ -26,7 +26,7 @@ Salin `.env.example` menjadi `.env.local` (atau tambahkan ke `.env.local` yang s
 |---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | **Project Settings → Data API → Project URL** | mis. `https://abcd.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | **Project Settings → API Keys → Publishable key** (`sb_publishable_...`) | Aman untuk browser. Legacy *anon* key juga bisa. |
-| `SUPABASE_SECRET_KEY` | **Project Settings → API Keys → Secret keys** (`sb_secret_...`) | **Hanya** untuk migrasi di komputer sendiri. Jangan di-commit / jangan dipasang di Vercel. |
+| `SUPABASE_SECRET_KEY` | **Project Settings → API Keys → Secret keys** (`sb_secret_...`) | **Hanya** untuk migrasi & backup di komputer sendiri. Jangan di-commit / jangan dipasang di Vercel. |
 
 Lalu jalankan ulang `npm run dev`.
 
@@ -38,12 +38,33 @@ Script mengisi tabel dari `src/lib/content/seed.js` dan meng-upload gambar serti
 ke bucket `media` (gambar dikompres ke WebP). Bila database sudah berisi, script berhenti agar tidak dobel;
 `npm run cms:migrate -- --reset` menghapus semua konten CMS lalu mengisinya ulang.
 
-Setelah selesai, `SUPABASE_SECRET_KEY` boleh dihapus dari `.env.local`.
+Setelah selesai, `SUPABASE_SECRET_KEY` boleh dihapus dari `.env.local` (simpan bila ingin menjalankan backup di bawah).
 
 ## 6. Deploy (Vercel)
 - Tambahkan `NEXT_PUBLIC_SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` di **Vercel → Project → Settings → Environment Variables**, lalu redeploy.
 - `vercel.json` menjadwalkan `/api/keepalive` sekali sehari supaya proyek Supabase gratis tidak di-pause
   (proyek gratis di-pause setelah ± 1 minggu tanpa aktivitas).
+
+## Backup & pemulihan
+```bash
+npm run cms:backup
+```
+Script hanya **membaca** dari Supabase (tidak mengubah/menghapus apa pun) dan menyimpan ke `backups/<tanggal>/`
+(folder ini di-`.gitignore`, jangan di-commit — isinya termasuk email admin):
+- `tables/*.json` — isi semua tabel CMS (`technologies`, `experiences`, `achievements`, `projects`, relasi teknologi, `admins`).
+- `media/` — semua file bucket `media` dengan struktur folder yang sama.
+- `restore.sql` — SQL untuk mengisi ulang tabel dari backup ini.
+- `manifest.json` — waktu backup, jumlah baris & file.
+
+Backup kedua di hari yang sama disimpan ke `backups/<tanggal>_<jam>` (tidak menimpa). Simpan salinannya di tempat lain
+(Google Drive / hard disk), mis. sebulan sekali atau setelah banyak mengubah konten.
+
+**Memulihkan** (mis. proyek Supabase terhapus / pindah proyek baru):
+1. Proyek baru: ikuti langkah 1–4 di atas (jalankan `schema.sql`, buat akun admin, isi env).
+2. **SQL Editor** → tempel isi `backups/<tanggal>/restore.sql` → **Run**. Baris yang id-nya sudah ada dilewati, jadi aman dijalankan ulang.
+3. **Storage → media** → unggah isi folder `backups/<tanggal>/media/` dengan struktur folder yang sama
+   (mis. `achievements/thumbs/…`), karena database menyimpan path file tersebut.
+4. Buka `/admin` → simpan salah satu konten (atau redeploy) agar halaman publik langsung diperbarui.
 
 ## Keamanan
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { track } from "@vercel/analytics";
 import { useTheme } from "@/lib/theme";
 import { safeStorage } from "@/lib/hooks";
 
@@ -31,10 +32,16 @@ export function UIProvider({ children }) {
       theme,
       toggleTheme,
       contactOpen,
-      openContact: () => setContactOpen(true),
+      openContact: () => {
+        setContactOpen(true);
+        track("contact_open");
+      },
       closeContact: () => setContactOpen(false),
       aiOpen,
-      openAI: () => setAiOpen(true),
+      openAI: () => {
+        setAiOpen(true);
+        track("ai_open");
+      },
       closeAI: () => setAiOpen(false),
       introOpen,
       openIntro: () => setIntroOpen(true),

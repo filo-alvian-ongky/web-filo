@@ -8,19 +8,21 @@
 
 import { useEffect, useRef } from "react";
 import { useUI } from "./providers/UIProvider";
+import { isLowPowerDevice } from "@/lib/hooks";
 
 const PALETTE = {
   light: { rgb: "10, 108, 245", dot: 0.55, line: 0.24, grab: 0.7 },
   dark: { rgb: "150, 192, 255", dot: 0.7, line: 0.24, grab: 0.75 },
 };
 
-function settings(width) {
+// lite: perangkat lemah / hemat data / kurangi gerakan → titik lebih jarang (garis yang dihitung jauh lebih sedikit)
+function settings(width, lite) {
   const small = width < 768;
   return {
     link: small ? 120 : 150, // jarak maksimum antar-titik agar tersambung
     grab: small ? 150 : 190, // radius kursor menarik garis
-    density: small ? 7000 : 12000, // luas layar (px²) per titik
-    max: small ? 48 : 130,
+    density: (small ? 7000 : 12000) * (lite ? 2 : 1), // luas layar (px²) per titik
+    max: lite ? (small ? 22 : 60) : small ? 48 : 130,
     speed: small ? 0.35 : 0.45,
   };
 }
@@ -40,11 +42,12 @@ export default function ParticleNetwork() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const lite = isLowPowerDevice();
     const particles = [];
     const pointer = { x: 0, y: 0, active: false };
     let w = 0;
     let h = 0;
-    let cfg = settings(window.innerWidth);
+    let cfg = settings(window.innerWidth, lite);
     let raf = 0;
     let touchTimer = 0;
 
@@ -117,7 +120,7 @@ export default function ParticleNetwork() {
       }
       w = nw;
       h = nh;
-      cfg = settings(w);
+      cfg = settings(w, lite);
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);

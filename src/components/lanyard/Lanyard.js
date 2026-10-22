@@ -6,23 +6,49 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { RotateCw } from "lucide-react";
 import { useUI } from "../providers/UIProvider";
+import { useLowPower } from "@/lib/hooks";
 import { useLang } from "@/lib/i18n";
 import { spring } from "@/lib/motion";
 
 // Three.js hanya dimuat di browser & hanya di halaman yang memakai lanyard
 const LanyardScene = dynamic(() => import("./LanyardScene"), { ssr: false });
 
-// Ditampilkan bila perangkat tidak mendukung WebGL
-function StaticBadge({ profile }) {
-  return (
-    <div className="absolute inset-0 grid place-items-center">
-      <div className="card w-48 p-3 text-center">
-        <div className="relative aspect-square rounded-[1.1rem] overflow-hidden bg-surface-2">
-          <Image src={profile.photo} alt={profile.name} fill sizes="192px" className="object-cover" />
-        </div>
-        <p className="mt-3 font-bold text-fg leading-tight">{profile.name}</p>
-        <p className="text-xs text-fg-2 mt-0.5">{profile.campus}</p>
+// Ditampilkan bila perangkat tidak mendukung WebGL, atau sebagai versi ringan di perangkat lemah.
+// anchor & onTap hanya dipakai versi ringan: kartu diletakkan di titik gantung & bisa diketuk untuk melihat foto.
+function StaticBadge({ profile, anchor, onTap }) {
+  const { t } = useLang();
+  const content = (
+    <>
+      <div className="relative aspect-square rounded-[1.1rem] overflow-hidden bg-surface-2">
+        <Image src={profile.photo} alt={profile.name} fill sizes="192px" className="object-cover" />
       </div>
+      <p className="mt-3 font-bold text-fg leading-tight">{profile.name}</p>
+      <p className="text-xs text-fg-2 mt-0.5">{profile.campus}</p>
+    </>
+  );
+
+  if (anchor === undefined) {
+    return (
+      <div className="absolute inset-0 grid place-items-center">
+        <div className="card w-48 p-3 text-center">{content}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="absolute inset-y-0 flex items-center" style={{ left: `${anchor * 100}%` }}>
+      <motion.button
+        type="button"
+        onClick={onTap}
+        aria-label={`${t.photoOf} ${profile.name}`}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileTap={{ scale: 0.96 }}
+        transition={spring.press}
+        className="pointer-events-auto card w-48 -translate-x-1/2 p-3 text-center"
+      >
+        {content}
+      </motion.button>
     </div>
   );
 }
@@ -39,6 +65,8 @@ export default function Lanyard({ profile, onTap, eventSource, anchorRef, classN
   const [active, setActive] = useState(true);
   const [anchor, setAnchor] = useState(0.5);
   const [flipped, setFlipped] = useState(false);
+  // null = belum diketahui (render server & hidrasi): jangan render apa pun agar Three.js tidak terlanjur diunduh
+  const lowPower = useLowPower();
 
   // Hentikan render & fisika saat lanyard tidak terlihat (hemat baterai)
   useEffect(() => {
@@ -68,36 +96,44 @@ export default function Lanyard({ profile, onTap, eventSource, anchorRef, classN
   return (
     // style: dipakai efek parallax scroll di hero (motion value)
     <motion.div ref={ref} className={className} style={style}>
-      <LanyardScene
-        profile={profile}
-        dark={theme === "dark"}
-        active={active}
-        anchor={anchor}
-        flipped={flipped}
-        eventSource={eventSource}
-        onTap={onTap}
-        fallback={<StaticBadge profile={profile} />}
-      />
+      {lowPower ? (
+        <StaticBadge profile={profile} anchor={anchor} onTap={onTap} />
+      ) : (
+        lowPower === false && (
+          <LanyardScene
+            profile={profile}
+            dark={theme === "dark"}
+            active={active}
+            anchor={anchor}
+            flipped={flipped}
+            eventSource={eventSource}
+            onTap={onTap}
+            fallback={<StaticBadge profile={profile} />}
+          />
+        )
+      )}
 
       {/* Tombol balik kartu — di HP menempel ke bawah area lanyard, di desktop tepat di bawah kartu */}
-      <motion.button
-        type="button"
-        onClick={() => setFlipped((f) => !f)}
-        // Jangan sampai klik tombol ikut dianggap "menarik kartu" oleh kanvas 3D
-        onPointerDown={(e) => e.stopPropagation()}
-        aria-pressed={flipped}
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.2, duration: 0.5 }}
-        whileTap={{ scale: 0.94 }}
-        style={{ left: `${anchor * 100}%` }}
-        className="pointer-events-auto absolute bottom-4 md:bottom-auto md:top-[81%] -translate-x-1/2 inline-flex items-center gap-1.5 h-9 pl-3 pr-3.5 rounded-full glass shadow-float text-[13px] font-semibold text-fg"
-      >
-        <motion.span animate={{ rotate: flipped ? 180 : 0 }} transition={spring.pop} className="grid place-items-center">
-          <RotateCw size={15} strokeWidth={2.5} />
-        </motion.span>
-        {t.flipCard}
-      </motion.button>
+      {lowPower === false && (
+        <motion.button
+          type="button"
+          onClick={() => setFlipped((f) => !f)}
+          // Jangan sampai klik tombol ikut dianggap "menarik kartu" oleh kanvas 3D
+          onPointerDown={(e) => e.stopPropagation()}
+          aria-pressed={flipped}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.2, duration: 0.5 }}
+          whileTap={{ scale: 0.94 }}
+          style={{ left: `${anchor * 100}%` }}
+          className="pointer-events-auto absolute bottom-4 md:bottom-auto md:top-[81%] -translate-x-1/2 inline-flex items-center gap-1.5 h-9 pl-3 pr-3.5 rounded-full glass shadow-float text-[13px] font-semibold text-fg"
+        >
+          <motion.span animate={{ rotate: flipped ? 180 : 0 }} transition={spring.pop} className="grid place-items-center">
+            <RotateCw size={15} strokeWidth={2.5} />
+          </motion.span>
+          {t.flipCard}
+        </motion.button>
+      )}
     </motion.div>
   );
 }

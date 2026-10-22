@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import Typewriter from "typewriter-effect";
+import { track } from "@vercel/analytics";
 import { ArrowUpRight, Download, Hand } from "lucide-react";
 import Card from "../components/Card";
 import Lanyard from "../components/lanyard/Lanyard";
@@ -16,7 +17,7 @@ import { useUI } from "../components/providers/UIProvider";
 import { btn } from "../components/ui/styles";
 import { highlights, profile } from "@/lib/data";
 import { fadeUp, stagger } from "@/lib/motion";
-import { useMediaQuery } from "@/lib/hooks";
+import { useLowPower, useMediaQuery } from "@/lib/hooks";
 import { tr, useLang } from "@/lib/i18n";
 
 // Widget sorotan: di desktop naik bergelombang (kiri lebih dulu) mengikuti scroll
@@ -53,6 +54,8 @@ export default function Home({ techStack, achievements, achievementCount }) {
   const highlightRef = useRef(null);
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  // Perangkat lemah / kurangi gerakan: kartu ID tampil statis, jadi petunjuk "tarik & ayunkan" tidak relevan
+  const lowPower = useLowPower();
   const scrub = !useReducedMotion();
 
   // Hero "menjauh" saat digulir: teks naik & memudar, lanyard tertinggal (parallax) lalu memudar.
@@ -137,14 +140,16 @@ export default function Home({ techStack, achievements, achievementCount }) {
                 <button onClick={openContact} className={btn.primary}>
                   {t.contactMe} <ArrowUpRight size={18} strokeWidth={2.5} />
                 </button>
-                <a href={L(profile.cv)} download className={btn.secondary}>
+                <a href={L(profile.cv)} download onClick={() => track("cv_download", { lang })} className={btn.secondary}>
                   <Download size={18} strokeWidth={2.25} /> {t.downloadCV}
                 </a>
               </motion.div>
 
-              <motion.p variants={fadeUp} className="hidden md:flex mt-10 items-center gap-2 text-sm text-fg-3">
-                <Hand size={16} /> {t.dragHint}
-              </motion.p>
+              {!lowPower && (
+                <motion.p variants={fadeUp} className="hidden md:flex mt-10 items-center gap-2 text-sm text-fg-3">
+                  <Hand size={16} /> {t.dragHint}
+                </motion.p>
+              )}
             </motion.div>
           </motion.div>
         </div>

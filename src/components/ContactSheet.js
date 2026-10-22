@@ -2,10 +2,14 @@
 
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
+import { track } from "@vercel/analytics";
 import { contactLinks } from "@/lib/data";
 import { useUI } from "./providers/UIProvider";
 import { useLang } from "@/lib/i18n";
 import Sheet from "./ui/Sheet";
+
+// Nama kanal untuk statistik: "Gmail" → email, lainnya huruf kecil (instagram, whatsapp)
+const channelOf = (name) => (name === "Gmail" ? "email" : name.toLowerCase());
 
 export default function ContactSheet() {
   const { contactOpen, closeContact } = useUI();
@@ -20,6 +24,7 @@ export default function ContactSheet() {
             href={link.href}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => track("contact_click", { channel: channelOf(link.name) })}
             className="group flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-surface-3/70 active:bg-surface-3"
           >
             <span className="relative w-11 h-11 rounded-[13px] overflow-hidden shrink-0 bg-surface">

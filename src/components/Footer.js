@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight, ChevronRight, Mail, Phone, Sparkles } from "lucide-react";
+import { track } from "@vercel/analytics";
 import { profile, socialLinks } from "@/lib/data";
 import Reveal from "./ui/Reveal";
 import ScrubText from "./ui/ScrubText";
@@ -11,13 +12,14 @@ import { useUI } from "./providers/UIProvider";
 import { useLang } from "@/lib/i18n";
 import { btn } from "./ui/styles";
 
-function Row({ href, icon: Icon, tone, label, value, external }) {
+function Row({ href, icon: Icon, tone, label, value, external, channel }) {
   return (
     <motion.a
       variants={slideIn}
       href={href}
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
+      onClick={() => track("contact_click", { channel })}
       className="group flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-surface-2 active:bg-surface-3"
     >
       <span className="grid place-items-center w-9 h-9 rounded-[11px] text-white shrink-0" style={{ background: tone }}>
@@ -89,10 +91,10 @@ export default function Footer() {
             viewport={viewportOnce}
             className="relative rounded-[1.4rem] bg-bg/60 dark:bg-surface-2/60 ring-1 ring-separator overflow-hidden divide-y divide-separator"
           >
-            <Row href={`mailto:${profile.email}`} icon={Mail} tone="#0a6cf5" label="Email" value={profile.email} />
-            <Row href={profile.phoneHref} icon={Phone} tone="#12a150" label={t.phone} value={profile.phone} />
+            <Row href={`mailto:${profile.email}`} icon={Mail} tone="#0a6cf5" label="Email" value={profile.email} channel="email" />
+            <Row href={profile.phoneHref} icon={Phone} tone="#12a150" label={t.phone} value={profile.phone} channel="phone" />
             {socialLinks.map((s) => (
-              <Row key={s.name} href={s.href} icon={s.icon} tone={tones[s.name]} label={s.name} external />
+              <Row key={s.name} href={s.href} icon={s.icon} tone={tones[s.name]} label={s.name} channel={s.name.toLowerCase()} external />
             ))}
           </motion.div>
         </Reveal>
